@@ -185,7 +185,7 @@ Dự án này được phát triển cho mục đích giáo dục và nghiên c�
 
 ## 🙏 Acknowledgments
 ![IUH LOGO](https://iuh.edu.vn/templates/2015/image/logo.png)
-- Khoa Khoa Học Máy Tính - Khoa Công Nghệ Thông Tin - Đại Học Công Nghiệp Thành Phố Hồ Chí Minh 
+- Khoa Học Máy Tính - Khoa Công Nghệ Thông Tin - Đại Học Công Nghiệp Thành Phố Hồ Chí Minh 
 - Framework Detectron2 by Facebook AI Research
 - Semi-supervised Learning Community
 - All contributors and supporters
