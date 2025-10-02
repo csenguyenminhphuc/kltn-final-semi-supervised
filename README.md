@@ -181,11 +181,11 @@ Dự án này được phát triển cho mục đích giáo dục và nghiên c�
 ## 📞 Liên hệ
 
 - **Nguyễn Minh Phúc**: [GitHub](https://github.com/csenguyenminhphuc) | Email: 22637001.phuc@student.iuh.edu.vn 
-- **Phạm Gia Khánh**: [GitHub](https://github.com/khanh-profile) | Email: 22724051.khanh@student.iuh.edu.vn
+- **Phạm Gia Khánh**: [GitHub](https://github.com/khanhcs) | Email: 22724051.khanh@student.iuh.edu.vn
 
 ## 🙏 Acknowledgments
-
-- Khoa Khoa Học Máy Tính - Khoa Công Nghệ Thông Tin - Đại Học Công Nghiệp Thành Phố Hồ Chí Minh ![IUH LOGO](https://iuh.edu.vn/templates/2015/image/logo.png)
+![IUH LOGO](https://iuh.edu.vn/templates/2015/image/logo.png)
+- Khoa Khoa Học Máy Tính - Khoa Công Nghệ Thông Tin - Đại Học Công Nghiệp Thành Phố Hồ Chí Minh 
 - Framework Detectron2 by Facebook AI Research
 - Semi-supervised Learning Community
 - All contributors and supporters
