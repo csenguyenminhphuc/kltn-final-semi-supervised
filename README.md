@@ -47,13 +47,13 @@ KLTN_SEMI/
 - **Backend**: Flask Framework
 - **Frontend**: HTML5, CSS3, JavaScript
 - **Visualization**: Matplotlib, Plotly
-- **Deployment**: Docker, Kubernetes
+- **Deployment**: Docker
 
 ### Development Tools
 - **Environment**: Conda, Python 3.9+
 - **Version Control**: Git/GitHub
 - **DevOps**: CI/CD Pipeline
-- **Cloud**: AWS, Cloudflare
+- **Cloud**: Cloudflare
 
 ## 👥 Đội ngũ phát triển
 
@@ -61,31 +61,33 @@ KLTN_SEMI/
 **Vai trò**: Machine Learning Engineer & DevOps Specialist
 
 **Chuyên môn**:
-- 🤖 **AI/ML**: PyTorch, TensorFlow, Scikit-learn, YOLO, CNN
-- ⚙️ **DevOps**: Docker, Kubernetes, CI/CD, Linux, AWS
+- 🤖 **AI/ML**: PyTorch, TensorFlow, Scikit-learn
+- ⚙️ **DevOps**: Docker, Linux
 - 🔒 **Security**: DevSecOps, Infrastructure Security
-- 💻 **Programming**: Python, JavaScript, Java, C++, SQL
+- 💻 **Programming**: Python, JavaScript
 
 **Trách nhiệm**:
-- Thiết kế và phát triển mô hình Semi-supervised Learning
-- Tối ưu hóa hiệu suất mô hình AI và pipeline ML
-- Xây dựng hạ tầng DevOps và đảm bảo bảo mật hệ thống
-- Triển khai tự động và quản lý production environment
+- Thiết kế và phát triển hệ thống sử dụng được mô hình Semi-supervised Learning
+- Thiết kế và phát triển giao diện website application
+- Xây dựng hạ tầng đảm bảo bảo mật hệ thống
+- Tham gia vào quá trình gán nhãn dữ liệu
+- Cấu hình server truy cập an toàn, cài đặt các môi trường đảm bảo cho việc huấn luyện mô hình
 
 ### 📊 Phạm Gia Khánh - AI Data Engineer
-**Vai trò**: Data Scientist & Full-stack Developer
+**Vai trò**: Data Engineer & Machine Learning Engineer
 
 **Chuyên môn**:
+- 🤖 **AI/ML**: PyTorch, TensorFlow, Scikit-learn
 - 📈 **Data Science**: Pandas, NumPy, Matplotlib, Seaborn, Statistics
-- 🌐 **Web Development**: React, Node.js, Flask, HTML/CSS
-- 🗄️ **Database**: MongoDB, PostgreSQL, Data Warehousing
-- 🔧 **Tools**: Anaconda, VS Code, Postman, Firebase, REST API
+- 🌐 **Web Development**: Flask, HTML/CSS
+- 🔧 **Tools**: Anaconda, VS Code, Postman
 
 **Trách nhiệm**:
 - Xử lý và phân tích dữ liệu huấn luyện
-- Thiết kế và phát triển giao diện web application
-- Xây dựng API và quản lý cơ sở dữ liệu
-- Chuyển đổi insights từ dữ liệu thành sản phẩm thực tế
+- Thiết kế và xây dựng được mô hình Semi-supervised Learning
+- Phân tích và trực quan hóa dữ liệu
+- Tham gia vào quá trình gán nhãn dữ liệu, chia tập dữ liệu
+- Huấn luyện mô hình và đưa ra giải pháp tối ưu cho mô hình
 
 ## 📦 Cài đặt và triển khai
 
@@ -128,6 +130,7 @@ python app.py
 ```
 
 Truy cập hệ thống tại: `http://localhost:12345`
+Truy cập hệ thống công khai: `kltn.csenguyenminhphuc.id.vn`
 
 ## 🎯 Sử dụng hệ thống
 
@@ -146,16 +149,16 @@ GET  /output/<file>     # Truy cập kết quả dự đoán
 
 ## 📊 Hiệu suất mô hình
 
-- **Độ chính xác (mAP)**: 85%+
-- **Thời gian xử lý**: ~2-3 giây/ảnh
+- **Độ chính xác (mAP)**: Đang hoàn thiện....
+- **Thời gian xử lý**: Đang hoàn thiện....
 - **Số lớp phát hiện**: 6 loại lỗi
-- **Threshold confidence**: 0.50
+- **Threshold confidence**: Đang hoàn thiện....
 
 ### Các lỗi có thể phát hiện:
 - 🔩 **Gay**: Lỗi gãy mũi khoan
-- 🔴 **Me**: Lỗi mẻ cạnh
+- 🔴 **Me**: Lỗi mẻ mũi khoan
 - 🟡 **Mon_dau**: Lỗi mòn đầu khoan  
-- 🔵 **Ri_set**: Lỗi rạn nứt
+- 🔵 **Ri_set**: Lỗi rỉ sét
 - 🟣 **Xuoc_than**: Lỗi xước thân
 
 ## 🛠️ Development
@@ -171,28 +174,18 @@ python train_net.py --num-gpus 1 --config configs/coco_supervision/faster_rcnn_R
 python inference.py --model-path temp/model_best.pth --test-data data/test/
 ```
 
-## 📝 Đóng góp
-
-Chúng tôi hoan nghênh mọi đóng góp cho dự án! Vui lòng:
-
-1. Fork repository
-2. Tạo feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Mở Pull Request
-
 ## 📄 License
 
 Dự án này được phát triển cho mục đích giáo dục và nghiên cứu. Vui lòng liên hệ tác giả để biết thêm thông tin về việc sử dụng thương mại.
 
 ## 📞 Liên hệ
 
-- **Nguyễn Minh Phúc**: [GitHub](https://github.com/phuc-profile) | Email: phuc@university.edu.vn
-- **Phạm Gia Khánh**: [GitHub](https://github.com/khanh-profile) | Email: khanh@university.edu.vn
+- **Nguyễn Minh Phúc**: [GitHub](https://github.com/csenguyenminhphuc) | Email: 22637001.phuc@student.iuh.edu.vn 
+- **Phạm Gia Khánh**: [GitHub](https://github.com/khanh-profile) | Email: 22724051.khanh@student.iuh.edu.vn
 
 ## 🙏 Acknowledgments
 
-- Khoa Khoa Học Máy Tính - Đại học ABC
+- Khoa Khoa Học Máy Tính - Khoa Công Nghệ Thông Tin - Đại Học Công Nghiệp Thành Phố Hồ Chí Minh ![IUH LOGO](https://iuh.edu.vn/templates/2015/image/logo.png)
 - Framework Detectron2 by Facebook AI Research
 - Semi-supervised Learning Community
 - All contributors and supporters
