@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khóa Luận Tốt Nghiệp - Khoa Học Máy Tính - Khánh Phúc - 2025</title>
+    <style>
+        /* ...existing styles... */
+        
+        .class-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .class-info h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .class-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .class-item {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .class-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Existing styles continue... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ec6cfd 0%, #6cf394 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ec6cfd 0%, #6cf394 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ec6cfd 0%, #6cf394 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 2em;
+        }
+
+        .image-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .image-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .image-box h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .image-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #000;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .image-box img {
+            max-width: 100%;
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+            cursor: grab;
+        }
+
+        .image-box img:active {
+            cursor: grabbing;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-box:hover .zoom-controls {
+            opacity: 1;
+        }
+
+        .zoom-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        .fullscreen-btn {
+            background: rgba(102, 126, 234, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .image-box:hover .fullscreen-btn {
+            opacity: 1;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(102, 126, 234, 1);
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .image-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .upload-section {
+                padding: 20px;
+            }
+
+            .image-box {
+                padding: 20px;
+            }
+
+            .zoom-controls {
+                opacity: 1;
+            }
+
+            .fullscreen-btn {
+                opacity: 1;
+            }
+        }
+
+        .file-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .image-overlay {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            overflow: auto;
+        }
+
+        .overlay-content {
+            position: relative;
+            margin: 2% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 1200px;
+            text-align: center;
+        }
+
+        .overlay-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .overlay-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .overlay-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .overlay-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .close-overlay {
+            background: rgba(220, 53, 69, 0.8);
+        }
+
+        .close-overlay:hover {
+            background: rgba(220, 53, 69, 1);
+        }
+
+        .zoom-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+           
+            <h1>🤖 Hệ thống website mô hình học sâu bán giám sát phát hiện lỗi mũi khoan từ ảnh đa góc nhìn</h1>
+            <p>Website này được phát triển bởi anh em Phúc - Khánh</p>
+            <p>Đề tài khóa luận Khoa Học Máy Tính - 2025</p>
+            <br>
+             <a href="/" style="text-decoration: none; color: #667eea; font-weight: 600; margin-right: 1rem; padding: 0.5rem 1rem; border-radius: 5px; background: #ececec;">🏠 Trang Chủ</a>
+        </div>
+
+        <div class="content">
+            <!-- Thông tin về các class có thể detect -->
+            <div class="class-info">
+                <h3>🎯 Các đối tượng có thể phát hiện:</h3>
+                <div class="class-list">
+                    <div class="class-item">Gay</div>
+                    <div class="class-item">Me</div>
+                    <div class="class-item">Mon_dau</div>
+                    <div class="class-item">Ri_set</div>
+                    <div class="class-item">Xuoc_than</div>
+                </div>
+            </div>
+
+            <form id="predictionForm" enctype="multipart/form-data">
+                <div class="upload-section">
+                    <div class="form-group">
+                        <label for="key">🔑 Nhập key xác thực:</label>
+                        <input type="text" id="key" name="key" placeholder="Nhập key để sử dụng hệ thống" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image">📷 Chọn ảnh mũi khoan để phân tích:</label>
+                        <input type="file" id="image" name="image" accept="image/*" required>
+                        <div class="file-info">Hỗ trợ: JPG, PNG, GIF (tối đa 100MB)</div>
+                    </div>
+
+                    <button type="submit" class="btn">🚀 Bắt đầu phân tích với AI</button>
+                </div>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Đang phân tích ảnh với AI model Detectron2...</p>
+            </div>
+
+            <div class="alert" id="alert"></div>
+
+            <div class="results" id="results">
+                <h2>📊 Kết quả phân tích AI</h2>
+                <div class="image-container">
+                    <div class="image-box">
+                        <h3>📸 Ảnh gốc</h3>
+                        <div class="image-wrapper">
+                            <img id="originalImage" src="" alt="Ảnh gốc" style="transform: scale(1);">
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" onclick="zoomImage('originalImage', 'in')" title="Phóng to">+</button>
+                                <button class="zoom-btn" onclick="zoomImage('originalImage', 'out')" title="Thu nhỏ">-</button>
+                                <button class="zoom-btn" onclick="resetZoom('originalImage')" title="Reset">⟲</button>
+                            </div>
+                            <!-- <button class="fullscreen-btn" onclick="openFullscreen('originalImage')" title="Xem toàn màn hình">🔍 Full</button> -->
+                        </div>
+                    </div>
+                    <div class="image-box">
+                        <h3>🎯 Kết quả phát hiện</h3>
+                        <div class="image-wrapper">
+                            <img id="resultImage" src="" alt="Kết quả dự đoán" style="transform: scale(1);">
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" onclick="zoomImage('resultImage', 'in')" title="Phóng to">+</button>
+                                <button class="zoom-btn" onclick="zoomImage('resultImage', 'out')" title="Thu nhỏ">-</button>
+                                <button class="zoom-btn" onclick="resetZoom('resultImage')" title="Reset">⟲</button>
+                            </div>
+                            <!-- <button class="fullscreen-btn" onclick="openFullscreen('resultImage')" title="Xem toàn màn hình">🔍 Full</button> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay cho fullscreen -->
+    <div id="imageOverlay" class="image-overlay" onclick="closeFullscreen()">
+        <div class="overlay-content" onclick="event.stopPropagation()">
+            <div class="overlay-controls">
+                <button class="overlay-btn" onclick="zoomOverlay('in')" title="Phóng to">+</button>
+                <button class="overlay-btn" onclick="zoomOverlay('out')" title="Thu nhỏ">-</button>
+                <button class="overlay-btn" onclick="resetOverlayZoom()" title="Reset">⟲</button>
+                <button class="overlay-btn close-overlay" onclick="closeFullscreen()" title="Đóng">&times;</button>
+            </div>
+            <img id="overlayImage" class="overlay-image" src="" alt="Full screen image" style="transform: scale(1);">
+            <div class="zoom-info" id="zoomInfo">Zoom: 100%</div>
+        </div>
+    </div>
+
+    <script>
+        let zoomLevels = {
+            originalImage: 1,
+            resultImage: 1,
+            overlayImage: 1
+        };
+
+        const ZOOM_STEP = 0.2;
+        const MIN_ZOOM = 0.5;
+        const MAX_ZOOM = 3;
+
+        function zoomImage(imageId, direction) {
+            const img = document.getElementById(imageId);
+            let currentZoom = zoomLevels[imageId];
+            
+            if (direction === 'in' && currentZoom < MAX_ZOOM) {
+                currentZoom += ZOOM_STEP;
+            } else if (direction === 'out' && currentZoom > MIN_ZOOM) {
+                currentZoom -= ZOOM_STEP;
+            }
+            
+            currentZoom = Math.round(currentZoom * 10) / 10;
+            zoomLevels[imageId] = currentZoom;
+            
+            img.style.transform = `scale(${currentZoom})`;
+            img.style.cursor = currentZoom > 1 ? 'move' : 'grab';
+            
+            if (currentZoom > 1) {
+                makeDraggable(img);
+            }
+        }
+
+        function resetZoom(imageId) {
+            const img = document.getElementById(imageId);
+            zoomLevels[imageId] = 1;
+            img.style.transform = 'scale(1)';
+            img.style.cursor = 'grab';
+            img.style.transformOrigin = 'center';
+        }
+
+        function zoomOverlay(direction) {
+            const img = document.getElementById('overlayImage');
+            const zoomInfo = document.getElementById('zoomInfo');
+            let currentZoom = zoomLevels.overlayImage;
+            
+            if (direction === 'in' && currentZoom < MAX_ZOOM) {
+                currentZoom += ZOOM_STEP;
+            } else if (direction === 'out' && currentZoom > MIN_ZOOM) {
+                currentZoom -= ZOOM_STEP;
+            }
+            
+            currentZoom = Math.round(currentZoom * 10) / 10;
+            zoomLevels.overlayImage = currentZoom;
+            
+            img.style.transform = `scale(${currentZoom})`;
+            zoomInfo.textContent = `Zoom: ${Math.round(currentZoom * 100)}%`;
+            
+            if (currentZoom > 1) {
+                makeDraggable(img);
+            }
+        }
+
+        function resetOverlayZoom() {
+            const img = document.getElementById('overlayImage');
+            const zoomInfo = document.getElementById('zoomInfo');
+            zoomLevels.overlayImage = 1;
+            img.style.transform = 'scale(1)';
+            img.style.transformOrigin = 'center';
+            zoomInfo.textContent = 'Zoom: 100%';
+        }
+
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            element.onmousedown = dragMouseDown;
+            
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+            
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                
+                const rect = element.getBoundingClientRect();
+                const newTop = rect.top - pos2;
+                const newLeft = rect.left - pos1;
+                
+                element.style.position = 'relative';
+                element.style.top = (element.offsetTop - pos2) + "px";
+                element.style.left = (element.offsetLeft - pos1) + "px";
+            }
+            
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        function openFullscreen(imageId) {
+            const img = document.getElementById(imageId);
+            const overlayImg = document.getElementById('overlayImage');
+            overlayImg.src = img.src;
+            resetOverlayZoom();
+            document.getElementById('imageOverlay').style.display = 'block';
+        }
+
+        function closeFullscreen() {
+            document.getElementById('imageOverlay').style.display = 'none';
+        }
+
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const key = document.getElementById('key').value;
+            const image = document.getElementById('image').files[0];
+            
+            if (!key || !image) {
+                showAlert('Vui lòng nhập key và chọn ảnh!', 'error');
+                return;
+            }
+            
+            formData.append('key', key);
+            formData.append('image', image);
+            
+            // Hiển thị loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('alert').style.display = 'none';
+            document.querySelector('.btn').disabled = true;
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Reset zoom levels
+                    zoomLevels.originalImage = 1;
+                    zoomLevels.resultImage = 1;
+                    
+                    // Hiển thị kết quả
+                    document.getElementById('originalImage').src = result.original_url;
+                    document.getElementById('resultImage').src = result.result_url;
+                    document.getElementById('originalImage').style.transform = 'scale(1)';
+                    document.getElementById('resultImage').style.transform = 'scale(1)';
+                    document.getElementById('results').style.display = 'block';
+                    showAlert('Phân tích thành công! 🎉 Kết quả đã hiển thị bên dưới.', 'success');
+                } else {
+                    showAlert(result.error || 'Có lỗi xảy ra!', 'error');
+                }
+            } catch (error) {
+                showAlert('Lỗi kết nối đến server!', 'error');
+            } finally {
+                // Ẩn loading
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.btn').disabled = false;
+            }
+        });
+        
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+        document.getElementById('image').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name;
+            if (fileName) {
+                const fileInfo = document.querySelector('.file-info');
+                fileInfo.textContent = `Đã chọn: ${fileName}`;
+                fileInfo.style.color = '#28a745';
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeFullscreen();
+            }
+            
+            if (document.getElementById('imageOverlay').style.display === 'block') {
+                if (e.key === '+' || e.key === '=') {
+                    e.preventDefault();
+                    zoomOverlay('in');
+                } else if (e.key === '-') {
+                    e.preventDefault();
+                    zoomOverlay('out');
+                } else if (e.key === '0') {
+                    e.preventDefault();
+                    resetOverlayZoom();
+                }
+            }
+        });
+
+        document.getElementById('overlayImage').addEventListener('wheel', function(e) {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                zoomOverlay('in');
+            } else {
+                zoomOverlay('out');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Phát hiện Lỗi Mũi Khoan - Về Chúng Tôi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ec6cfd 0%, #6cf394 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            padding: 40px 0;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            display: inline-block;
+            padding: 12px 25px;
+            background: rgba(255,255,255,0.9);
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255,255,255,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            background: white;
+            box-shadow: 0 8px 25px rgba(255,255,255,0.3);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .card p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .team-section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+
+        .team-section h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 40px;
+            font-size: 2.2em;
+        }
+
+        .team-members {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .member {
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            background: #f8f9ff;
+            border: 2px solid #e8ecff;
+        }
+
+        .member-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            color: white;
+        }
+
+        .member h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+
+        .member .role {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .skills-section {
+            margin: 20px 0;
+        }
+
+        .skills-title {
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .skill-tag {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .member .description {
+            color: #666;
+            line-height: 1.5;
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        .cta-section {
+            text-align: center;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #ef74ff, #ef74ff);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .features {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .features li {
+            padding: 8px 0;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .main-content,
+            .team-members {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2em;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+
+            .skills-grid {
+                justify-content: center;
+            }
+
+            .member {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Hệ thống Mô hình Học Sâu Bán Giám Sát Phát hiện Lỗi Mũi Khoan từ Ảnh Đa Góc Nhìn</h1>
+            <p>Website được phát triển bởi anh em Phúc - Khánh</p>
+            <p>Đề tài Khóa luận Tốt nghiệp - Khoa Khoa Học Máy Tính - 2025</p>
+        </header>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>🎯 Về Dự Án</h2>
+                <p>Hệ thống phát hiện lỗi mũi khoan sử dụng mô hình học sâu bán giám sát từ ảnh đa góc nhìn, được thiết kế để tự động phát hiện và phân loại các loại lỗi trên mũi khoan trong môi trường sản xuất công nghiệp.</p>
+                <p>Với công nghệ deep learning tiên tiến, hệ thống có thể xử lý ảnh chất lượng cao và đưa ra kết quả phân tích chính xác, hỗ trợ tối ưu quy trình kiểm tra chất lượng.</p>
+                <ul class="features">
+                    <li>Phát hiện lỗi mũi khoan tự động</li>
+                    <li>Xử lý ảnh đa góc nhìn</li>
+                    <li>Mô hình học sâu bán giám sát</li>
+                    <li>Giao diện web thân thiện</li>
+                    <li>Kết quả phân tích chi tiết</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>🔧 Công Nghệ</h2>
+                <p>Dự án được xây dựng bằng các công nghệ hiện đại và đáng tin cậy:</p>
+                <ul class="features">
+                    <li><strong>Backend:</strong> Python Flask Framework</li>
+                    <li><strong>Machine Learning:</strong> PyTorch, TensorFlow</li>
+                    <li><strong>Computer Vision:</strong> OpenCV, PIL</li>
+                    <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript</li>
+                    <li><strong>Data Processing:</strong> NumPy, Pandas</li>
+                    <li><strong>Deployment:</strong> Cloudflare, K8S</li>
+                </ul>
+                <p>Hệ thống đảm bảo hiệu suất cao, độ chính xác tốt và khả năng xử lý real-time.</p>
+            </div>
+        </div>
+
+        <div class="team-section">
+            <h2>👥 Đội Ngũ Phát Triển</h2>
+            <div class="team-members">
+                <div class="member">
+                    <div class="member-avatar">👨‍💻</div>
+                    <h3>Nguyễn Minh Phúc</h3>
+                    <div class="role">Machine Learning Engineer & DevOps</div>
+                    
+                    <div class="skills-section">
+                        <div class="skills-title">🚀 Kỹ năng Programming:</div>
+                        <div class="skills-grid">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">JavaScript</span>
+                            <span class="skill-tag">Java</span>
+                            <span class="skill-tag">C++</span>
+                            <span class="skill-tag">SQL</span>
+                        </div>
+
+                        <div class="skills-title">🤖 Machine Learning & AI:</div>
+                        <div class="skills-grid">
+                            <span class="skill-tag">PyTorch</span>
+                            <span class="skill-tag">TensorFlow</span>
+                            <span class="skill-tag">Scikit-learn</span>
+                            <span class="skill-tag">OpenCV</span>
+                            <span class="skill-tag">YOLO</span>
+                            <span class="skill-tag">CNN</span>
+                        </div>
+
+                        <div class="skills-title">⚙️ DevOps & Tools:</div>
+                        <div class="skills-grid">
+                            <span class="skill-tag">Docker</span>
+                            <span class="skill-tag">Kubernetes</span>
+                            <span class="skill-tag">Git/GitHub</span>
+                            <span class="skill-tag">Linux</span>
+                            <span class="skill-tag">AWS</span>
+                            <span class="skill-tag">CI/CD</span>
+                        </div>
+                    </div>
+
+                    <div class="description">
+                        Chuyên gia về Machine Learning và DevOps, có kinh nghiệm phát triển các mô hình deep learning cho computer vision. 
+                        Đảm bảo hệ thống vận hành ổn định, tối ưu hiệu suất và triển khai tự động. 
+                        Có khả năng tích hợp AI vào các ứng dụng thực tế và xây dựng pipeline ML hoàn chỉnh.
+                    </div>
+                </div>
+                
+                <div class="member">
+                    <div class="member-avatar">📊</div>
+                    <h3>Phạm Gia Khánh</h3>
+                    <div class="role">Data Scientist & Full-stack Developer</div>
+                    
+                    <div class="skills-section">
+                        <div class="skills-title">💻 Web Development:</div>
+                        <div class="skills-grid">
+                            <span class="skill-tag">React</span>
+                            <span class="skill-tag">Node.js</span>
+                            <span class="skill-tag">Flask</span>
+                            <span class="skill-tag">HTML/CSS</span>
+                            <span class="skill-tag">MongoDB</span>
+                            <span class="skill-tag">PostgreSQL</span>
+                        </div>
+
+                        <div class="skills-title">📈 Data Science:</div>
+                        <div class="skills-grid">
+                            <span class="skill-tag">Pandas</span>
+                            <span class="skill-tag">NumPy</span>
+                            <span class="skill-tag">Matplotlib</span>
+                            <span class="skill-tag">Seaborn</span>
+                            <span class="skill-tag">Jupyter</span>
+                            <span class="skill-tag">Statistics</span>
+                        </div>
+
+                        <div class="skills-title">🔧 Tools & Frameworks:</div>
+                        <div class="skills-grid">
+                            <span class="skill-tag">Anaconda</span>
+                            <span class="skill-tag">VS Code</span>
+                            <span class="skill-tag">Postman</span>
+                            <span class="skill-tag">Firebase</span>
+                            <span class="skill-tag">REST API</span>
+                            <span class="skill-tag">Agile</span>
+                        </div>
+                    </div>
+
+                    <div class="description">
+                        Chuyên gia về Data Science và Full-stack Development, có kinh nghiệm xử lý và phân tích dữ liệu lớn. 
+                        Thiết kế và phát triển giao diện người dùng, xây dựng API và quản lý cơ sở dữ liệu. 
+                        Có khả năng chuyển đổi insights từ dữ liệu thành các sản phẩm công nghệ thực tế.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <h2>🚀 Trải Nghiệm Hệ Thống</h2>
+            <p>Sẵn sàng để trải nghiệm công nghệ phát hiện lỗi mũi khoan tự động? Hãy thử ngay!</p>
+            <br>
+            <div>
+            <a href="/ai" class="btn">Thử Nghiệm Ngay</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
