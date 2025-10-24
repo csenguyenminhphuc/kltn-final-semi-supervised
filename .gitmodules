@@ -1,0 +1,6 @@
+[submodule "code/DETR_Mixup/Soft_Teacher"]
+	path = code/DETR_Mixup/Soft_Teacher
+	url = https://github.com/microsoft/SoftTeacher.git
+[submodule "code/DETR_Mixup/Unbiased_Teacher"]
+	path = code/DETR_Mixup/Unbiased_Teacher
+	url = https://github.com/facebookresearch/unbiased-teacher.git
