@@ -24,7 +24,8 @@ yarn-error.log*
 
 #file
 cloudflared.txt
-
+auto
+*.pth
 
 #folder
 output
