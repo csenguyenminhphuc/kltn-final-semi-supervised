@@ -181,7 +181,7 @@ Dự án này được phát triển cho mục đích giáo dục và nghiên c�
 ## 📞 Liên hệ
 
 - **Nguyễn Minh Phúc**: [GitHub](https://github.com/csenguyenminhphuc) | Email: 22637001.phuc@student.iuh.edu.vn 
-- **Phạm Gia Khánh**: [GitHub](https://github.com/khanhcs) | Email: 22724051.khanh@student.iuh.edu.vn
+- **Phạm Gia Khánh**: [GitHub](https://github.com/cs-khanh) | Email: 22724051.khanh@student.iuh.edu.vn
 
 ## 🙏 Acknowledgments
 ![IUH LOGO](https://iuh.edu.vn/templates/2015/image/logo.png)
