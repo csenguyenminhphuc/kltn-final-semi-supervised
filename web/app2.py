@@ -2,8 +2,8 @@ import sys
 import os
 
 # Thêm đường dẫn đến Soft_Teacher và mmdetection
-sys.path.append('/home/coder/trong/KLTN_SEMI/code/Soft_Teacher')
-sys.path.append('/home/coder/trong/KLTN_SEMI/code/Soft_Teacher/mmdetection')
+sys.path.append('/home/coder/data/trong/KLTN/Soft_Teacher')
+sys.path.append('/home/coder/data/trong/KLTN/Soft_Teacher/mmdetection')
 
 from flask import Flask, request, render_template, jsonify, send_from_directory, url_for
 import cv2
@@ -27,8 +27,8 @@ def init_model():
         register_all_modules()
         
         # Đường dẫn config và checkpoint
-        soft_cfg = '/home/coder/trong/KLTN_SEMI/code/Soft_Teacher/work_dirs/soft_teacher_custom_40/20251007_081326/vis_data/config.py'
-        ckpt = '/home/coder/trong/KLTN_SEMI/code/Soft_Teacher/work_dirs/soft_teacher_custom_40/epoch_1.pth'
+        soft_cfg = '/home/coder/data/trong/KLTN/Soft_Teacher/work_dirs/soft_teacher_custom_40/soft_teacher_custom_40.py'
+        ckpt = '/home/coder/data/trong/KLTN/Soft_Teacher/work_dirs/soft_teacher_custom_40/epoch_1.pth'
         
         print(f"Loading config from: {soft_cfg}")
         print(f"Loading checkpoint from: {ckpt}")
@@ -77,11 +77,18 @@ def init_model():
         print('missing:', len(missing), 'unexpected:', len(unexpected))
         
         # Ép model dùng đúng tên lớp
-        MY_CLASSES = ('Gay','Me','Mon_dau','Ri_set','Xuoc')
+        MY_CLASSES = ('Broken','Chipped','Scratched','Severe_Rust','Tip_Wear')
         model.dataset_meta = {'classes': MY_CLASSES}
         
         # Màu sắc cho từng class
-        MY_PALETTE = [(255,0,0),(0,0,255),(0,255,0),(255,255,0),(128,0,128)]
+        #MY_PALETTE = [(255,0,0),(0,0,255),(0,255,0),(255,255,0),(128,0,128)]
+        MY_PALETTE = [
+            (134, 34, 255),   
+            (0, 255, 206),
+            (199, 252, 0), 
+            (254, 0, 86), 
+            (255, 128, 0), 
+        ]
         model.dataset_meta['palette'] = MY_PALETTE
         
         # Tạo visualizer
@@ -107,13 +114,17 @@ if model is None:
     sys.exit(1)
 
 def predict_and_save(image_path):
-    """Dự đoán và lưu ảnh kết quả sử dụng Soft Teacher model theo đúng cách từ notebook"""
+    """Dự đoán và lưu ảnh kết quả sử dụng Soft Teacher model theo đúng cách từ notebook
+    
+    Returns:
+        Tuple (output_filename, detections_info) hoặc (None, None) nếu có lỗi
+    """
     try:
         # Đọc ảnh
         img = mmcv.imread(image_path)
         if img is None:
             print(f"Error: Could not read image from {image_path}")
-            return None
+            return None, None
         
         # Thực hiện inference
         res = inference_detector(model, img)
@@ -130,34 +141,49 @@ def predict_and_save(image_path):
         
         print(f"Soft Teacher prediction saved to: {output_path}")
         
-        # In thông tin detection để debug
+        # Tạo thông tin detection để trả về
+        detections_info = []
         if hasattr(res, 'pred_instances') and len(res.pred_instances) > 0:
             pred_instances = res.pred_instances
             scores = pred_instances.scores.cpu().numpy()
             labels = pred_instances.labels.cpu().numpy()
+            bboxes = pred_instances.bboxes.cpu().numpy() if hasattr(pred_instances, 'bboxes') else []
             
             # Lọc theo threshold
             valid_mask = scores > 0.5
             valid_scores = scores[valid_mask]
             valid_labels = labels[valid_mask]
+            valid_bboxes = bboxes[valid_mask] if len(bboxes) > 0 else []
             
             if len(valid_labels) > 0:
                 print(f"Detected {len(valid_labels)} objects:")
-                for label, score in zip(valid_labels, valid_scores):
+                for i, (label, score) in enumerate(zip(valid_labels, valid_scores)):
                     cls_name = class_names[label] if label < len(class_names) else f"class_{label}"
+                    detection = {
+                        'id': i + 1,
+                        'class_name': cls_name,
+                        'confidence': float(score),
+                        'bbox': {
+                            'x1': float(valid_bboxes[i][0]) if len(valid_bboxes) > i else 0,
+                            'y1': float(valid_bboxes[i][1]) if len(valid_bboxes) > i else 0,
+                            'x2': float(valid_bboxes[i][2]) if len(valid_bboxes) > i else 0,
+                            'y2': float(valid_bboxes[i][3]) if len(valid_bboxes) > i else 0
+                        }
+                    }
+                    detections_info.append(detection)
                     print(f"  - {cls_name} (confidence: {score:.3f})")
             else:
                 print("No objects detected above threshold")
         else:
             print("No objects detected")
             
-        return output_filename
+        return output_filename, detections_info
         
     except Exception as e:
         print(f"Error in Soft Teacher prediction: {str(e)}")
         import traceback
         traceback.print_exc()
-        return None
+        return None, None
 
 @app.route('/')
 def index():
@@ -191,9 +217,22 @@ def predict():
     print(f"Image uploaded to: {upload_path}")
 
     # Dự đoán bằng Soft Teacher
-    output_filename = predict_and_save(upload_path)
+    output_filename, detections_info = predict_and_save(upload_path)
     
     if output_filename:
+        # Tạo summary text
+        if detections_info and len(detections_info) > 0:
+            summary = f"Phát hiện {len(detections_info)} đối tượng:"
+            class_count = {}
+            for det in detections_info:
+                cls = det['class_name']
+                class_count[cls] = class_count.get(cls, 0) + 1
+            
+            summary_parts = [f"{count} {cls}" for cls, count in class_count.items()]
+            summary += " " + ", ".join(summary_parts)
+        else:
+            summary = "Không phát hiện lỗi nào trên mũi khoan."
+        
         return jsonify({
             'success': True,
             'original_image': filename,
@@ -201,7 +240,10 @@ def predict():
             'original_url': url_for('uploaded_file', filename=filename),
             'result_url': url_for('output_file', filename=output_filename),
             'classes': class_names,
-            'model_type': 'Soft Teacher'
+            'model_type': 'Soft Teacher',
+            'detections': detections_info,
+            'summary': summary,
+            'total_detections': len(detections_info) if detections_info else 0
         })
     else:
         return jsonify({'error': 'Có lỗi xảy ra trong quá trình dự đoán với Soft Teacher'}), 500

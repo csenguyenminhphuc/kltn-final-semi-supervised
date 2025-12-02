@@ -421,6 +421,102 @@
             background: rgba(220, 53, 69, 1);
         }
 
+        /* Detection Summary Styles */
+        .detection-summary {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 5px solid #28a745;
+        }
+
+        .detection-summary h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .summary-text {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #28a745;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .summary-text.no-detection {
+            color: #6c757d;
+        }
+
+        .detection-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .detection-item {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease;
+        }
+
+        .detection-item:hover {
+            transform: translateX(5px);
+        }
+
+        .detection-item .item-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .detection-item .item-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .detection-item .item-class {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .detection-item .item-confidence {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .detection-item .item-confidence.high {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .detection-item .item-confidence.medium {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+
+        .detection-item .item-confidence.low {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
         .zoom-info {
             position: absolute;
             bottom: 20px;
@@ -450,11 +546,11 @@
             <div class="class-info">
                 <h3>🎯 Các đối tượng có thể phát hiện:</h3>
                 <div class="class-list">
-                    <div class="class-item">Gay</div>
-                    <div class="class-item">Me</div>
-                    <div class="class-item">Mon_dau</div>
-                    <div class="class-item">Ri_set</div>
-                    <div class="class-item">Xuoc_than</div>
+                    <div class="class-item">Broken(Gay)</div>
+                    <div class="class-item">Chipped(Me)</div>
+                    <div class="class-item">Scratched(Mon_dau)</div>
+                    <div class="class-item">Severe_Rust(Ri_set)</div>
+                    <div class="class-item">Tip_Wear(Xuoc_than)</div>
                 </div>
             </div>
 
@@ -509,6 +605,13 @@
                             <!-- <button class="fullscreen-btn" onclick="openFullscreen('resultImage')" title="Xem toàn màn hình">🔍 Full</button> -->
                         </div>
                     </div>
+                </div>
+                
+                <!-- Phần hiển thị kết quả dạng text -->
+                <div class="detection-summary" id="detectionSummary">
+                    <h3>📝 Chi tiết kết quả phát hiện</h3>
+                    <div class="summary-text" id="summaryText"></div>
+                    <div class="detection-list" id="detectionList"></div>
                 </div>
             </div>
         </div>
@@ -682,11 +785,15 @@
                     zoomLevels.originalImage = 1;
                     zoomLevels.resultImage = 1;
                     
-                    // Hiển thị kết quả
+                    // Hiển thị ảnh kết quả
                     document.getElementById('originalImage').src = result.original_url;
                     document.getElementById('resultImage').src = result.result_url;
                     document.getElementById('originalImage').style.transform = 'scale(1)';
                     document.getElementById('resultImage').style.transform = 'scale(1)';
+                    
+                    // Hiển thị kết quả dạng text
+                    displayDetectionResults(result);
+                    
                     document.getElementById('results').style.display = 'block';
                     showAlert('Phân tích thành công! 🎉 Kết quả đã hiển thị bên dưới.', 'success');
                 } else {
@@ -700,6 +807,48 @@
                 document.querySelector('.btn').disabled = false;
             }
         });
+        
+        function displayDetectionResults(result) {
+            const summaryText = document.getElementById('summaryText');
+            const detectionList = document.getElementById('detectionList');
+            
+            // Hiển thị summary
+            summaryText.textContent = result.summary || 'Không có thông tin';
+            
+            if (result.total_detections === 0) {
+                summaryText.classList.add('no-detection');
+                summaryText.innerHTML = '✅ ' + result.summary;
+            } else {
+                summaryText.classList.remove('no-detection');
+                summaryText.innerHTML = '⚠️ ' + result.summary;
+            }
+            
+            // Hiển thị danh sách detection
+            detectionList.innerHTML = '';
+            
+            if (result.detections && result.detections.length > 0) {
+                result.detections.forEach((det, index) => {
+                    const confidence = (det.confidence * 100).toFixed(1);
+                    let confidenceClass = 'high';
+                    if (det.confidence < 0.5) {
+                        confidenceClass = 'low';
+                    } else if (det.confidence < 0.7) {
+                        confidenceClass = 'medium';
+                    }
+                    
+                    const itemHtml = `
+                        <div class="detection-item">
+                            <div class="item-info">
+                                <span class="item-number">${det.id}</span>
+                                <span class="item-class">${det.class_name}</span>
+                            </div>
+                            <span class="item-confidence ${confidenceClass}">Độ tin cậy: ${confidence}%</span>
+                        </div>
+                    `;
+                    detectionList.innerHTML += itemHtml;
+                });
+            }
+        }
         
         function showAlert(message, type) {
             const alert = document.getElementById('alert');
