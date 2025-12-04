@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Data Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <i class="fas fa-database"></i>
+                <h1>Data Viewer</h1>
+                <p>Nhập key để truy cập dữ liệu</p>
+            </div>
+            
+            {% if error %}
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <form method="POST" class="login-form">
+                <div class="input-group">
+                    <i class="fas fa-key"></i>
+                    <input type="password" name="key" placeholder="Nhập access key..." required autofocus>
+                </div>
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Truy cập
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

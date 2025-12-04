@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ filename }} - Data Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="view-page">
+    <nav class="navbar dark">
+        <div class="nav-brand">
+            <a href="{{ url_for('browse', subpath='/'.join(filepath.split('/')[:-1])) if '/' in filepath else url_for('browse') }}">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <span>{{ filename }}</span>
+        </div>
+        <div class="nav-actions">
+            <a href="{{ url_for('download_file', filepath=filepath) }}" class="btn-download">
+                <i class="fas fa-download"></i>
+                <span>Tải xuống</span>
+            </a>
+        </div>
+    </nav>
+    
+    <div class="viewer-container">
+        {% if file_type == 'image' %}
+        <div class="image-viewer">
+            <img src="{{ url_for('serve_file', filepath=filepath) }}" alt="{{ filename }}" id="mainImage">
+        </div>
+        {% elif file_type == 'video' %}
+        <div class="video-viewer">
+            <video controls autoplay>
+                <source src="{{ url_for('serve_file', filepath=filepath) }}">
+                Trình duyệt không hỗ trợ video.
+            </video>
+        </div>
+        {% endif %}
+        
+        <!-- Navigation buttons -->
+        {% if siblings|length > 1 %}
+        <button class="nav-btn prev" id="prevBtn" title="Ảnh trước">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="nav-btn next" id="nextBtn" title="Ảnh sau">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        
+        <div class="image-counter">
+            {{ current_index + 1 }} / {{ siblings|length }}
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Zoom controls -->
+    {% if file_type == 'image' %}
+    <div class="zoom-controls">
+        <button id="zoomOut" title="Thu nhỏ">
+            <i class="fas fa-search-minus"></i>
+        </button>
+        <button id="zoomReset" title="Kích thước gốc">
+            <i class="fas fa-expand"></i>
+        </button>
+        <button id="zoomIn" title="Phóng to">
+            <i class="fas fa-search-plus"></i>
+        </button>
+    </div>
+    {% endif %}
+    
+    <script>
+        const siblings = {{ siblings | tojson }};
+        let currentIndex = {{ current_index }};
+        let zoomLevel = 1;
+        
+        // Navigation
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        if (prevBtn && nextBtn) {
+            prevBtn.addEventListener('click', () => navigate(-1));
+            nextBtn.addEventListener('click', () => navigate(1));
+        }
+        
+        function navigate(direction) {
+            const newIndex = currentIndex + direction;
+            if (newIndex >= 0 && newIndex < siblings.length) {
+                window.location.href = '/view/' + siblings[newIndex];
+            }
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') navigate(-1);
+            if (e.key === 'ArrowRight') navigate(1);
+            if (e.key === 'Escape') {
+                const backPath = '{{ filepath }}'.split('/').slice(0, -1).join('/');
+                window.location.href = backPath ? '/browse/' + backPath : '/browse';
+            }
+        });
+        
+        // Zoom controls
+        const mainImage = document.getElementById('mainImage');
+        const zoomIn = document.getElementById('zoomIn');
+        const zoomOut = document.getElementById('zoomOut');
+        const zoomReset = document.getElementById('zoomReset');
+        
+        if (mainImage && zoomIn && zoomOut && zoomReset) {
+            zoomIn.addEventListener('click', () => {
+                zoomLevel = Math.min(zoomLevel + 0.25, 3);
+                mainImage.style.transform = `scale(${zoomLevel})`;
+            });
+            
+            zoomOut.addEventListener('click', () => {
+                zoomLevel = Math.max(zoomLevel - 0.25, 0.5);
+                mainImage.style.transform = `scale(${zoomLevel})`;
+            });
+            
+            zoomReset.addEventListener('click', () => {
+                zoomLevel = 1;
+                mainImage.style.transform = `scale(1)`;
+            });
+            
+            // Mouse wheel zoom
+            mainImage.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    zoomLevel = Math.min(zoomLevel + 0.1, 3);
+                } else {
+                    zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
+                }
+                mainImage.style.transform = `scale(${zoomLevel})`;
+            });
+        }
+    </script>
+</body>
+</html>

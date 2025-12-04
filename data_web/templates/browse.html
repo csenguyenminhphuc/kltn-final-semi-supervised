@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duyệt dữ liệu - Data Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-database"></i>
+            <span>Data Viewer</span>
+        </div>
+        <div class="nav-actions">
+            <a href="{{ url_for('logout') }}" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Đăng xuất</span>
+            </a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('browse') }}">
+                <i class="fas fa-home"></i> Trang chủ
+            </a>
+            {% for crumb in breadcrumbs %}
+            <span class="separator">/</span>
+            <a href="{{ url_for('browse', subpath=crumb.path) }}">{{ crumb.name }}</a>
+            {% endfor %}
+        </div>
+        
+        <!-- View mode toggle -->
+        <div class="toolbar">
+            <div class="view-toggle">
+                <button class="btn-view active" data-view="grid" title="Xem dạng lưới">
+                    <i class="fas fa-th-large"></i>
+                </button>
+                <button class="btn-view" data-view="list" title="Xem dạng danh sách">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+            <div class="file-count">
+                <i class="fas fa-folder"></i>
+                {{ items|selectattr('type', 'equalto', 'folder')|list|length }} thư mục,
+                <i class="fas fa-file"></i>
+                {{ items|rejectattr('type', 'equalto', 'folder')|list|length }} file
+            </div>
+        </div>
+        
+        <!-- File browser -->
+        <div class="file-browser grid-view" id="fileBrowser">
+            {% if current_path %}
+            <a href="{{ url_for('browse', subpath='/'.join(current_path.split('/')[:-1])) if '/' in current_path else url_for('browse') }}" class="file-item folder">
+                <div class="file-icon">
+                    <i class="fas fa-level-up-alt"></i>
+                </div>
+                <div class="file-info">
+                    <span class="file-name">..</span>
+                    <span class="file-meta">Quay lại</span>
+                </div>
+            </a>
+            {% endif %}
+            
+            {% for item in items %}
+            {% if item.type == 'folder' %}
+            <a href="{{ url_for('browse', subpath=current_path + '/' + item.name if current_path else item.name) }}" class="file-item folder">
+                <div class="file-icon">
+                    <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-info">
+                    <span class="file-name">{{ item.name }}</span>
+                    <span class="file-meta">{{ item.count }} file</span>
+                </div>
+            </a>
+            {% elif item.type == 'image' %}
+            <a href="{{ url_for('view_file', filepath=current_path + '/' + item.name if current_path else item.name) }}" class="file-item image">
+                <div class="file-preview">
+                    <img src="{{ url_for('serve_file', filepath=current_path + '/' + item.name if current_path else item.name) }}" alt="{{ item.name }}" loading="lazy">
+                </div>
+                <div class="file-info">
+                    <span class="file-name">{{ item.name }}</span>
+                    <span class="file-meta">{{ item.size }}</span>
+                </div>
+                <div class="file-actions">
+                    <a href="{{ url_for('download_file', filepath=current_path + '/' + item.name if current_path else item.name) }}" class="btn-action" title="Tải xuống" onclick="event.stopPropagation();">
+                        <i class="fas fa-download"></i>
+                    </a>
+                </div>
+            </a>
+            {% else %}
+            <a href="{{ url_for('download_file', filepath=current_path + '/' + item.name if current_path else item.name) }}" class="file-item file">
+                <div class="file-icon">
+                    {% if item.type == 'video' %}
+                    <i class="fas fa-video"></i>
+                    {% else %}
+                    <i class="fas fa-file"></i>
+                    {% endif %}
+                </div>
+                <div class="file-info">
+                    <span class="file-name">{{ item.name }}</span>
+                    <span class="file-meta">{{ item.size }}</span>
+                </div>
+                <div class="file-actions">
+                    <a href="{{ url_for('download_file', filepath=current_path + '/' + item.name if current_path else item.name) }}" class="btn-action" title="Tải xuống">
+                        <i class="fas fa-download"></i>
+                    </a>
+                </div>
+            </a>
+            {% endif %}
+            {% endfor %}
+            
+            {% if not items and not current_path %}
+            <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <p>Thư mục trống</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

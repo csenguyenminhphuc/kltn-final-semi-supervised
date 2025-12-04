@@ -123,7 +123,7 @@ def inference_mixpl(img_path):
     return result
 
 
-def predict_and_save(image_path, score_thr=0.3):
+def predict_and_save(image_path, score_thr=0.4):
     """
     Dự đoán và lưu ảnh kết quả với bounding boxes
     
@@ -267,7 +267,7 @@ def predict():
     print(f"Image uploaded to: {upload_path}")
 
     # Dự đoán
-    output_filename, detections_info = predict_and_save(upload_path, score_thr=0.3)
+    output_filename, detections_info = predict_and_save(upload_path, score_thr=0.4)
     
     if output_filename:
         # Tạo summary text
