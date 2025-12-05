@@ -15,31 +15,49 @@ Hệ thống này được phát triển để tự động phát hiện và ph�
 ## 🏗️ Kiến trúc hệ thống
 
 ```
-KLTN_SEMI/
-├── 🤖 code/                    # Mã nguồn mô hình AI
-│   ├── Soft_Teacher/          # Framework Semi-supervised Learning
-│   └── Unbiased_Teacher/      # Thuật toán Unbiased Teacher
-├── 📊 data/                   # Dữ liệu huấn luyện và kiểm thử
-│   ├── train/                 # Dataset training
-│   ├── valid/                 # Dataset validation
-│   └── test/                  # Dataset testing
-├── 🌐 web/                    # Ứng dụng web interface
-│   ├── app.py                 # Flask backend
-│   ├── static/                # CSS, JS, assets
-│   ├── templates/             # HTML templates
-│   ├── uploads/               # Thư mục upload ảnh
-│   └── output/                # Kết quả dự đoán
-├── 📖 document/               # Tài liệu và hướng dẫn
-├── 📈 visualize/              # Công cụ trực quan hóa
-└── 🔧 output/                 # Kết quả và metrics
+KLTN/
+├── 🤖 Soft_Teacher/              # Framework Soft Teacher (Multi-view)
+│   ├── mmdetection/              # MMDetection framework
+│   ├── mmengine/                 # MMEngine core
+│   ├── tools/                    # Training & inference tools
+│   └── work_dirs/                # Trained models & logs
+├── 🤖 Soft_Teacher_SingleView/   # Soft Teacher Single View version
+├── 🤖 Unbiased_Teacher/          # Thuật toán Unbiased Teacher
+│   ├── configs/                  # Configuration files
+│   ├── ubteacher/                # Core module
+│   └── output/                   # Training outputs
+├── 🤖 Semi-DETR/                 # Semi-supervised DETR
+│   ├── configs/                  # Configuration files
+│   ├── detr_od/                  # Object detection module
+│   └── detr_ssod/                # Semi-supervised module
+├── 🤖 DETR_Mixup/                # DETR với MixPL augmentation
+│   ├── MixPL/                    # MixPL module
+│   └── mmdetection/              # MMDetection framework
+├── 📊 data_drill/                # Dataset mũi khoan v1
+│   ├── train/                    # Training images
+│   ├── valid/                    # Validation images
+│   ├── anno_train/               # Training annotations
+│   └── anno_valid/               # Validation annotations
+├── 📊 data_drill_2/              # Dataset mũi khoan v2
+├── 📊 data_drill_3/              # Dataset mũi khoan v3 (có test set)
+├── 🌐 web/                       # Web application chính
+│   ├── app.py                    # Flask backend
+│   ├── static/                   # CSS, JS, assets
+│   └── templates/                # HTML templates
+├── 🌐 data_web/                  # Web application phụ
+└── 📖 document/                  # Tài liệu và hướng dẫn
 ```
 
 ## 🚀 Công nghệ sử dụng
 
 ### Backend AI Engine
-- **Framework**: Detectron2, PyTorch
-- **Architecture**: Faster R-CNN với FPN backbone
-- **Method**: Semi-supervised Learning (Unbiased Teacher)
+- **Framework**: Detectron2, MMDetection, PyTorch
+- **Architecture**: Faster R-CNN với FPN backbone, DETR Transformer
+- **Methods**: 
+  - 🔹 **Unbiased Teacher** - Detectron2-based semi-supervised learning
+  - 🔹 **Soft Teacher** - MMDetection-based với multi-view support
+  - 🔹 **Semi-DETR** - Transformer-based semi-supervised detection
+  - 🔹 **MixPL** - Mix Pseudo Labels augmentation
 - **Computer Vision**: OpenCV, PIL
 - **Data Processing**: NumPy, Pandas
 
@@ -73,8 +91,8 @@ KLTN_SEMI/
 - Tham gia vào quá trình gán nhãn dữ liệu
 - Cấu hình server truy cập an toàn, cài đặt các môi trường đảm bảo cho việc huấn luyện mô hình
 
-### 📊 Phạm Gia Khánh - AI Data Engineer
-**Vai trò**: Data Engineer & Machine Learning Engineer
+### 📊 Phạm Gia Khánh - AI Engineer
+**Vai trò**: Data Engineer & AI Engineer
 
 **Chuyên môn**:
 - 🤖 **AI/ML**: PyTorch, TensorFlow, Scikit-learn
@@ -95,38 +113,56 @@ KLTN_SEMI/
 ```bash
 - Python 3.9+
 - CUDA 11.8+ (for GPU acceleration)
-- RAM: 16GB+ recommended
-- Storage: 50GB+ available space
+- RAM: 32GB+ recommended
+- Storage: 150GB+ available space
+- GPU: NVIDIA với ít nhất 32GB VRAM
 ```
 
 ### 1. Clone repository
 ```bash
-git clone https://github.com/your-repo/kltn-final-semi-supervised.git
-cd KLTN_SEMI
+git clone https://github.com/csenguyenminhphuc/kltn-final-semi-supervised.git
+cd KLTN
 ```
 
-### 2. Thiết lập môi trường
+### 2. Thiết lập môi trường cho Web Application
 ```bash
-# Tạo conda environment
+# Tạo conda environment cho web
 conda create --prefix ./web/.envweb python=3.9.19 -y
 conda activate ./web/.envweb
 
 # Cài đặt PyTorch với CUDA
 pip install torch==2.0.0+cu118 torchvision==0.15.1+cu118 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu118
 
-# Cài đặt Detectron2
+# Cài đặt Detectron2 (cho Unbiased Teacher)
 python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'
-```
 
-### 3. Cài đặt dependencies
-```bash
+# Cài đặt dependencies web
 cd web
 pip install -r requirements.txt
 ```
 
-### 4. Chạy ứng dụng
+### 3. Thiết lập môi trường cho Soft Teacher / Semi-DETR
 ```bash
+# Tạo conda environment riêng
+conda create -n soft_teacher python=3.9 -y
+conda activate soft_teacher
+
+# Cài đặt PyTorch
+pip install torch==2.0.0+cu118 torchvision==0.15.1+cu118 --index-url https://download.pytorch.org/whl/cu118
+
+# Cài đặt MMDetection và MMEngine
+pip install mmcv-full mmdet mmengine
+
+# Cài đặt các dependencies khác
+pip install wandb prettytable opencv-python
+```
+
+### 4. Chạy Web Application
+```bash
+cd web
 python app.py
+# Hoặc sử dụng gunicorn cho production
+gunicorn -c gunicorn_config.py app:app
 ```
 
 Truy cập hệ thống tại: `http://localhost:12345`
@@ -163,15 +199,37 @@ GET  /output/<file>     # Truy cập kết quả dự đoán
 
 ## 🛠️ Development
 
-### Training mô hình mới
+### Training Unbiased Teacher
 ```bash
-cd code/Unbiased_Teacher
+cd Unbiased_Teacher
 python train_net.py --num-gpus 1 --config configs/coco_supervision/faster_rcnn_R_50_FPN_sup1_run1_custom.yaml
+```
+
+### Training Soft Teacher (MMDetection)
+```bash
+cd Soft_Teacher
+python tools/train.py configs/soft_teacher/soft_teacher_faster_rcnn_r50_fpn.py
+```
+
+### Training Semi-DETR
+```bash
+cd Semi-DETR
+python tools/train.py configs/semi_detr/semi_detr_r50.py
+```
+
+### Training với MixPL
+```bash
+cd DETR_Mixup
+# Xem notebook train.ipynb để biết chi tiết
 ```
 
 ### Đánh giá mô hình
 ```bash
-python inference.py --model-path temp/model_best.pth --test-data data/test/
+# Unbiased Teacher
+python inference.py --model-path output/model_best.pth --test-data data_drill_3/test/
+
+# Soft Teacher
+python tools/test.py configs/soft_teacher.py work_dirs/latest.pth
 ```
 
 ## 📄 License
@@ -184,7 +242,7 @@ Dự án này được phát triển cho mục đích giáo dục và nghiên c�
 - **Phạm Gia Khánh**: [GitHub](https://github.com/cs-khanh) | Email: 22724051.khanh@student.iuh.edu.vn
 
 ## 🙏 Acknowledgments
-![IUH LOGO](https://iuh.edu.vn/templates/2015/image/logo.png)
+![IUH LOGO](https://iuh.edu.vn/assets/images/icons/logo.svg?v=51)
 - Khoa Học Máy Tính - Khoa Công Nghệ Thông Tin - Đại Học Công Nghiệp Thành Phố Hồ Chí Minh 
 - Framework Detectron2 by Facebook AI Research
 - Semi-supervised Learning Community
