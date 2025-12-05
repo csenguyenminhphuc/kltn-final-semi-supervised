@@ -1,0 +1,130 @@
+================================================================================
+BBOX SIZE ANALYSIS REPORT
+================================================================================
+
+Total annotations: 4125
+
+================================================================================
+WIDTH STATISTICS (pixels)
+================================================================================
+  Min:    16.3
+  Max:    255.0
+  Mean:   100.0
+  Median: 78.0
+  Std:    61.7
+
+  Percentiles:
+     1%:   25.5
+     5%:   33.9
+    10%:   39.8
+    25%:   53.6
+    50%:   78.0
+    75%:  128.7
+    90%:  212.6
+    95%:  225.8
+    99%:  242.3
+
+================================================================================
+HEIGHT STATISTICS (pixels)
+================================================================================
+  Min:    23.3
+  Max:    720.0
+  Mean:   181.6
+  Median: 155.6
+  Std:    111.7
+
+  Percentiles:
+     1%:   47.3
+     5%:   63.7
+    10%:   74.1
+    25%:   97.0
+    50%:  155.6
+    75%:  230.1
+    90%:  327.2
+    95%:  403.6
+    99%:  600.5
+
+================================================================================
+ASPECT RATIO STATISTICS (width / height)
+================================================================================
+  Min:    0.104
+  Max:    4.836
+  Mean:   0.677
+  Median: 0.501
+  Std:    0.512
+
+  Percentiles:
+     1%:  0.151
+     5%:  0.208
+    10%:  0.253
+    25%:  0.344
+    50%:  0.501
+    75%:  0.828
+    90%:  1.350
+    95%:  1.790
+    99%:  2.480
+
+================================================================================
+SMALL BBOX COUNTS
+================================================================================
+  w<4 or h<4     :     0 boxes ( 0.00%)
+  w<8 or h<8     :     0 boxes ( 0.00%)
+  w<16 or h<16   :     0 boxes ( 0.00%)
+  w<32 or h<32   :   160 boxes ( 3.88%)
+
+================================================================================
+RECOMMENDED ANCHOR CONFIGURATION
+================================================================================
+
+RPN Head Config:
+```python
+detector.rpn_head = dict(
+    type='RPNHead',
+    in_channels=256,
+    feat_channels=256,
+    anchor_generator=dict(
+        type='AnchorGenerator',
+        scales=[8],
+        ratios=[0.25, 0.5, 1.0, 2.0],
+        strides=[4, 8, 16, 32, 64]),
+    bbox_coder=dict(
+        type='DeltaXYWHBBoxCoder',
+        target_means=[.0, .0, .0, .0],
+        target_stds=[1.0, 1.0, 1.0, 1.0]),
+    loss_cls=dict(
+        type='CrossEntropyLoss',
+        use_sigmoid=True,
+        loss_weight=1.0),
+    loss_bbox=dict(type='L1Loss', loss_weight=1.0))
+```
+
+Recommended min_bbox_size: 16
+Median object size: 116.8 pixels
+
+================================================================================
+EXPLANATION
+================================================================================
+
+1. **Scales**: [8] is the standard base anchor size
+   - Combined with 5 FPN strides [4,8,16,32,64], creates anchors:
+     * Stride 4:  32x32 base anchor (covers small objects)
+     * Stride 8:  64x64 base anchor
+     * Stride 16: 128x128 base anchor
+     * Stride 32: 256x256 base anchor
+     * Stride 64: 512x512 base anchor (covers large objects)
+
+2. **Ratios**: [0.25, 0.5, 1.0, 2.0]
+   - Covers aspect ratio range of your dataset:
+   - Dataset aspect ratios: 0.21 (5%) to 1.79 (95%)
+   - Each ratio creates different anchor shapes:
+     * 0.25: Tall objects (h > w)
+     * 0.5: Tall objects (h > w)
+     * 1.0: Square objects (h = w)
+     * 2.0: Wide objects (w > h)
+
+3. **min_bbox_size**: 16
+   - Filters proposals smaller than 16x16 pixels
+   - Your smallest GT box: 25.5x47.3 (1st percentile)
+   - Safe threshold that removes false positives without losing GT
+
+================================================================================

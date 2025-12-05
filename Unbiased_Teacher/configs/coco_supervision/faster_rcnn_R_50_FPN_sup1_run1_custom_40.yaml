@@ -1,0 +1,58 @@
+_BASE_: "../Base-RCNN-FPN.yaml"
+MODEL:
+  META_ARCHITECTURE: "TwoStagePseudoLabGeneralizedRCNN"
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+  MASK_ON: False
+  RESNETS:
+    DEPTH: 50
+  PROPOSAL_GENERATOR:
+    NAME: "PseudoLabRPN"
+  RPN:
+    PRE_NMS_TOPK_TRAIN: 2000
+    POST_NMS_TOPK_TRAIN: 1000
+    POSITIVE_FRACTION: 0.25
+    LOSS: "CrossEntropy"
+    IN_FEATURES: ["p2","p3","p4","p5"]  # bỏ p6
+  ANCHOR_GENERATOR:
+    # nếu bạn train trên ảnh gốc, giữ SIZES mặc định (32..512) là ổn;
+    # nếu train trên ảnh đã crop sát thân mũi khoan, có thể dùng nhỏ hơn.
+    SIZES: [[32], [64], [128], [256]]
+    ASPECT_RATIOS: [[0.25, 0.5, 1.0, 2.0, 3.0]]  # thêm 0.33 và 3.0
+  ROI_HEADS:
+    BATCH_SIZE_PER_IMAGE: 256
+    NAME: "StandardROIHeadsPseudoLab"
+    LOSS: "FocalLoss"
+    NUM_CLASSES: 6
+SOLVER:
+  LR_SCHEDULER_NAME: "WarmupMultiStepLR"
+  STEPS: (42000, 52000)
+  MAX_ITER: 60000
+  IMG_PER_BATCH_LABEL: 4
+  IMG_PER_BATCH_UNLABEL: 4
+  BASE_LR: 0.001
+  WARMUP_ITERS: 1000
+  AMP:
+    ENABLED: True
+DATALOADER:
+  SUP_PERCENT: 40.0
+  RANDOM_DATA_SEED: 42
+  NUM_WORKERS: 4
+DATASETS:
+  CROSS_DATASET: False
+  TRAIN: ("TRAIN_DATASET",)
+  TEST: ("VAL_DATASET",)
+SEMISUPNET:
+  Trainer: "ubteacher"
+  BBOX_THRESHOLD: 0.5
+  TEACHER_UPDATE_ITER: 1
+  BURN_UP_STEP: 5000
+  EMA_KEEP_RATE: 0.9996
+  UNSUP_LOSS_WEIGHT: 1.0
+INPUT:
+  MIN_SIZE_TRAIN: (256,)  
+  MIN_SIZE_TEST: 256
+  MAX_SIZE_TRAIN: 720
+  MAX_SIZE_TEST: 720
+TEST:
+  EVAL_PERIOD: 10000
+OUTPUT_DIR: "/home/coder/data/trong/KLTN/Unbiased_Teacher/output_40"

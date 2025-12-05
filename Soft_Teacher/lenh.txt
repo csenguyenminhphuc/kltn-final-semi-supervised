@@ -1,0 +1,4 @@
+# Analyze current dataset
+python tools/misc/analyze_bbox_for_anchors.py --ann-file /home/coder/data/trong/KLTN/Soft_Teacher/data_drill/anno_train/_annotations_filtered.coco.json  --img-size 720 256  --output-file bbox_analysis_report.txt
+
+
