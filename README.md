@@ -183,13 +183,6 @@ GET  /uploads/<file>    # Truy cập ảnh đã upload
 GET  /output/<file>     # Truy cập kết quả dự đoán
 ```
 
-## 📊 Hiệu suất mô hình
-
-- **Độ chính xác (mAP)**: Đang hoàn thiện....
-- **Thời gian xử lý**: Đang hoàn thiện....
-- **Số lớp phát hiện**: 6 loại lỗi
-- **Threshold confidence**: Đang hoàn thiện....
-
 ### Các lỗi có thể phát hiện:
 - 🔩 **Gay**: Lỗi gãy mũi khoan
 - 🔴 **Me**: Lỗi mẻ mũi khoan
