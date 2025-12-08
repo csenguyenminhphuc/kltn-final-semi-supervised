@@ -309,15 +309,26 @@ class MVViT(nn.Module):
             # Moderate mode: Attention Pooling BEFORE transformer
             # Strategy: Pool H*W -> K tokens per view, then cross-view attention on V*K tokens
             # This ACTUALLY reduces FLOPs unlike pooling after transformer!
-            # Memory: ~14-26GB, Speed: Medium, Accuracy: Better (optimized for hard classes)
+            # Memory: ~8-16GB, Speed: Medium, Accuracy: Good (RECOMMENDED for 32GB GPU)
             
-            # INCREASED K for better spatial detail preservation
-            # Analysis: P2 (180×64=11,520) pooled to K:
-            #   K=1024 → 8.9% spatial detail (original)
-            #   K=2048 → 17.8% spatial detail (2x better!) ✅
-            # Critical for small narrow defects: Severe_Rust (median ratio 0.44), Chipped (0.51)
-            # With K=2048, narrow defects get ~60 tokens vs ~33 tokens (1.8x improvement)
-            K = min(2048, H * W)
+            # ADAPTIVE K: Balance memory vs information loss
+            # Strategy: Keep 15-25% spatial detail, capped for memory safety
+            # 
+            # Analysis of information loss:
+            # FPN Level | H×W     | Tokens | K=512 | K=1024 | K=1536 (NEW)
+            # --------- | ------- | ------ | ----- | ------ | ------------
+            # P2        | 180×64  | 11,520 | 4.4%  | 8.9%   | 13.3% ✅
+            # P3        | 90×32   | 2,880  | 17.8% | 35.6%  | 53.3% ✅
+            # P4        | 45×16   | 720    | 71.1% | 100%   | 100%  ✅
+            # P5        | 23×8    | 184    | 100%  | 100%   | 100%  ✅
+            #
+            # K=1536 gives:
+            # - P2: 13.3% detail (good for narrow defects like Severe_Rust, Chipped)
+            # - P3/P4/P5: No downsampling (preserves ALL spatial info!)
+            # - Memory: 8-16GB (safe for 32GB GPU)
+            # - Tradeoff: Slightly less detail on P2 than K=2048 (13.3% vs 17.8%)
+            #   but MUCH more stable and won't OOM!
+            K = min(1536, H * W)
             
             # Step 1: Flatten spatial for each view independently
             # (B, V, embed_dim, H, W) -> (B*V, H*W, embed_dim)

@@ -82,9 +82,15 @@ class SemiBaseDetector(BaseDetector):
 
         # Handle unsupervised loss if unlabeled data exists
         if 'unsup_teacher' in multi_batch_inputs and 'unsup_student' in multi_batch_inputs:
-            origin_pseudo_data_samples, batch_info = self.get_pseudo_instances(
-                multi_batch_inputs['unsup_teacher'],
-                multi_batch_data_samples['unsup_teacher'])
+            # Use consensus-based pseudo-label generation if available
+            if hasattr(self, 'get_pseudo_instances_with_consensus'):
+                origin_pseudo_data_samples, batch_info = self.get_pseudo_instances_with_consensus(
+                    multi_batch_inputs['unsup_teacher'],
+                    multi_batch_data_samples['unsup_teacher'])
+            else:
+                origin_pseudo_data_samples, batch_info = self.get_pseudo_instances(
+                    multi_batch_inputs['unsup_teacher'],
+                    multi_batch_data_samples['unsup_teacher'])
             multi_batch_data_samples[
                 'unsup_student'] = self.project_pseudo_instances(
                     origin_pseudo_data_samples,

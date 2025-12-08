@@ -88,17 +88,17 @@ detector.backbone = dict(
     #   * Better for narrow aspect ratios (median 0.44, 0.51)
     # - mlp_ratio=3.0: Increased capacity for feature transformation (was 2.0)
     #   * More complex patterns → better distinguish hard classes
-    # - spatial_attention='moderate': Keep K=512 tokens (good balance)
+    # - spatial_attention='moderate': Keep K=2048 tokens (good balance)
     # - use_gradient_checkpointing=True: ~50% memory saving in backward pass
     mvvit=dict(
         type='MVViT',
         embed_dim=256,       # Match FPN channels
-        num_heads=8,         # INCREASED from 4 → more diverse attention for hard classes
-        num_layers=2,        # INCREASED from 1 → deeper cross-view reasoning (CRITICAL!)
-        mlp_ratio=3.0,       # INCREASED from 2.0 → more capacity for subtle features
-        dropout=0.1,         # Dropout rate (unchanged)
+        num_heads=4,         # INCREASED from 4 → more diverse attention for hard classes
+        num_layers=1,        # INCREASED from 1 → deeper cross-view reasoning (CRITICAL!)
+        mlp_ratio=2.0,       # INCREASED from 2.0 → more capacity for subtle features
+        dropout=0.2,         # Dropout rate (unchanged)
         use_layer_norm=True, # Use LayerNorm instead of BatchNorm
-        spatial_attention='moderate',  # Pool to 512 tokens BEFORE transformer (saves FLOPs!)
+        spatial_attention='moderate',  # Pool to 2048 tokens BEFORE transformer (saves FLOPs!)
         use_gradient_checkpointing=True  # Enable gradient checkpointing for memory efficiency
     )
 )
@@ -109,10 +109,10 @@ detector.rpn_head = dict(
     feat_channels=256,
     anchor_generator=dict(
         type='AnchorGenerator',
-        scales=[4, 8, 16],  # Multiple scales for objects of different sizes
+        scales=[8, 16, 32],  # Multiple scales for objects of different sizes
         # TARGETED RATIOS for Severe_Rust (med=0.45, P25-P75: 0.34-0.61) and Chipped (med=0.51, P25-P75: 0.39-0.65)
         # Analysis shows 60% of Severe_Rust and 48% of Chipped have ratio < 0.5 (narrow boxes)
-        ratios=[0.2, 0.35, 0.45, 0.55, 0.65, 1.0, 2.0],  # Added 0.45, 0.55, 0.65 for narrow defects
+        ratios=[0.3, 0.45, 0.6, 1.0, 2.0],  # Added 0.45, 0.55, 0.65 for narrow defects
         strides=[4, 8, 16, 32, 64]),
     bbox_coder=dict(
         type='DeltaXYWHBBoxCoder',
@@ -121,9 +121,9 @@ detector.rpn_head = dict(
     loss_cls=dict(
         type='FocalLoss',  # CHANGED from CrossEntropyLoss → focus on hard examples
         use_sigmoid=True,
-        gamma=2.5,         # INCREASED to 2.5 (was 2.0) → stronger hard example focus
-        alpha=0.75,        # INCREASED from 0.25 → weight FG more heavily (sparse data!)
-        loss_weight=2.5),  # INCREASED from 2.0 → emphasize classification
+        gamma=2.0,         # REDUCED from 2.5 → standard ViT/Focal Loss value
+        alpha=0.5,         # REDUCED from 0.75 → more balanced FG:BG weighting
+        loss_weight=2.0),  # REDUCED from 2.5 → balance with bbox loss
     loss_bbox=dict(type='L1Loss', loss_weight=1.0))
 
 # Override ROI head to use Focal Loss (combat class imbalance)
@@ -135,9 +135,9 @@ detector.rpn_head = dict(
 detector.roi_head.bbox_head.loss_cls = dict(
     type='FocalLoss',     # CHANGED from CrossEntropyLoss
     use_sigmoid=True,     # MUST be True (mmdet implementation requirement)
-    gamma=3.0,            # INCREASED to 3.0 (was 2.5) → EXTREME focus on hard examples!
-    alpha=0.75,           # High alpha → weight FG more (helps rare classes)
-    loss_weight=2.5)      # INCREASED from 2.0 → emphasize classification even more
+    gamma=2.2,            # REDUCED from 3.0 → less extreme, more stable
+    alpha=0.5,            # REDUCED from 0.75 → more balanced FG:BG weighting
+    loss_weight=1.5)      # REDUCED from 2.5 → better balance with bbox loss
 
 # Override train_cfg to use more relaxed IoU thresholds for narrow objects
 detector.train_cfg = dict(
@@ -152,8 +152,8 @@ detector.train_cfg = dict(
         sampler=dict(
             type='RandomSampler',
             num=256,              # REDUCED from 512 → fewer samples for sparse data
-            pos_fraction=0.8,     # INCREASED to 0.8 → 80% must be positive (only 51 negatives!)
-            neg_pos_ub=1,         # CRITICAL: max 1 negative per positive (1:1 ratio, not 1:3!)
+            pos_fraction=0.6,     # REDUCED from 0.8 → more balanced FG:BG ratio (60:40)
+            neg_pos_ub=2,         # INCREASED from 1 → allow more negatives (1:0.67 ratio)
             add_gt_as_proposals=False),
         allowed_border=-1,
         pos_weight=-1,
@@ -174,24 +174,24 @@ detector.train_cfg = dict(
         sampler=dict(
             type='RandomSampler',
             num=256,              # Match RPN
-            pos_fraction=0.75,    # 75% positive (sparse data!)
-            neg_pos_ub=1,         # Max 1 negative per positive
+            pos_fraction=0.6,     # REDUCED from 0.75 → more balanced (60:40)
+            neg_pos_ub=2,         # INCREASED from 1 → allow more negatives
             add_gt_as_proposals=True),
         pos_weight=-1,
         debug=False))
 
-# Test config for RPN: increase threshold to reduce false positives
+# Test config for RPN: balanced settings to reduce false positives
 detector.test_cfg.rpn = dict(
-    nms_pre=4000,           # Increased from 2000 (was too strict)
-    max_per_img=2000,       # Increased from 1000 (was too strict)
+    nms_pre=2000,           # REDUCED from 4000 → faster inference
+    max_per_img=1000,       # REDUCED from 2000 → fewer low-quality proposals
     nms=dict(type='nms', iou_threshold=0.7),
-    min_bbox_size=8)        # Reduced from 16 to 8 (less aggressive filtering)
+    min_bbox_size=8)        # Keep small objects (drill bits can be narrow)
 
-# Test config for RCNN: stricter threshold
+# Test config for RCNN: stricter threshold to reduce false positives
 detector.test_cfg.rcnn = dict(
-    score_thr=0.05,
+    score_thr=0.5, 
     nms=dict(type='nms', iou_threshold=0.5),
-    max_per_img=100)
+    max_per_img=20)  # REDUCED from 100 → limit max predictions per crop
 
 
 model = dict(
@@ -211,21 +211,31 @@ model = dict(
         # Solution: LOWER thresholds aggressively to allow teacher to generate more pseudo-labels
         #           even for uncertain predictions → help student learn from harder examples
         # 
-        # Threshold hierarchy (strictest to loosest):
-        # 1. pseudo_label_initial_score_thr: Initial filtering
-        # 2. cls_pseudo_thr: Classification loss filtering  
-        # 3. rpn_pseudo_thr: RPN loss filtering
-        pseudo_label_initial_score_thr=0.4,  # LOWERED from 0.5 → allow more uncertain pseudo-labels
-        cls_pseudo_thr=0.35,                 # LOWERED from 0.4 → help hard examples learn
-        rpn_pseudo_thr=0.35,                 # LOWERED from 0.4 → allow more proposals
-        reg_pseudo_thr=0.02,                 # Bbox uncertainty threshold (unchanged)
+        # Threshold hierarchy (progressively relaxed for better data utilization):
+        # 1. pseudo_label_initial_score_thr=0.4: Strict gate to filter low-quality teacher predictions
+        # 2. cls_pseudo_thr=0.35: Relaxed to allow more pseudo-labels (15-20% more boxes in 0.35-0.4 range)
+        # 3. rpn_pseudo_thr=0.35: Relaxed to allow more RPN proposals for learning
+        # Rationale: Hard classes (Severe_Rust: 0.006 mAP) need MORE training signal from unlabeled data
+        #            Cross-view uncertainty already provides soft weighting → can afford lower thresholds
+        #            Teacher is strong (mean score 0.985) → 0.35-0.4 predictions still reliable
+        pseudo_label_initial_score_thr=0.4,  # Strict initial gate
+        cls_pseudo_thr=0.35,                  # Relaxed to increase pseudo-label utilization
+        rpn_pseudo_thr=0.35,                  # Relaxed to allow more proposals
+        reg_pseudo_thr=0.10,                 # INCREASED from 0.02 → allow cross-view uncertainty weighted boxes
         jitter_times=5,                      # Augmentation for uncertainty estimation
         jitter_scale=0.03,                   # Scale of jitter augmentation
-        min_pseudo_bbox_wh=(8, 8)),         # Filter small noisy boxes
+        min_pseudo_bbox_wh=(8, 8),          # Filter small noisy boxes
+        # Multi-view consensus: CROSS-VIEW UNCERTAINTY approach
+        # For rotation views (0°, 45°, 90°, etc.): Can't use IoU-based matching
+        # Strategy: Measure CLASS-LEVEL agreement across views
+        # - If class predicted by multiple views → LOW uncertainty → higher weight
+        # - If class only in 1 view → HIGH uncertainty → lower weight
+        # This increases pseudo-label quality without requiring spatial alignment
+        enable_consensus=True),              # Enable cross-view uncertainty weighting
     semi_test_cfg=dict(predict_on='teacher'),
     views_per_sample=views_per_sample,  
     aggregate_views='mean'   # How to aggregate multi-view losses
-)
+)   
 
 dataset_type = 'CocoDataset'
 data_root = '/home/coder/data/trong/KLTN/Soft_Teacher/data_drill/'
@@ -236,28 +246,22 @@ data_root = '/home/coder/data/trong/KLTN/Soft_Teacher/data_drill/'
 # Severe_Rust: Rust patterns vary HEAVILY with lighting/contrast
 # Chipped: Small cracks/chips need sharpness variation to be visible
 color_space = [
-    [dict(type='AutoContrast', prob=0.6)],  # Increased from 0.5 → help rust patterns
-    [dict(type='Equalize',    prob=0.5)],   # Increased from 0.4 → normalize lighting
-    # AGGRESSIVE brightness variation for Severe_Rust (rust visibility changes with light)
-    [dict(type='Brightness',  prob=0.8, level=7, min_mag=0.7, max_mag=1.4)],  # Wider range: 0.7-1.4 (was 0.8-1.25)
-    # AGGRESSIVE contrast for both classes (rust patterns, crack visibility)
-    [dict(type='Contrast',    prob=0.8, level=7, min_mag=0.7, max_mag=1.5)],  # Wider range: 0.7-1.5 (was 0.8-1.3)
-    # INCREASED sharpness for Chipped (small cracks need sharp edges to detect)
-    [dict(type='Sharpness',   prob=0.5, level=6, min_mag=0.7, max_mag=2.0)],  # Increased prob 0.3→0.5, range 0.7-2.0
-    # ADD: Posterize to simulate different lighting conditions for rust
-    [dict(type='Posterize',   prob=0.3, level=5, min_mag=4, max_mag=8)],
+    [dict(type='AutoContrast', prob=0.5)],  # Giảm từ 0.6
+    [dict(type='Equalize',    prob=0.4)],   # Giảm từ 0.5
+    # MUTUAL EXCLUSIVE: Brightness OR Contrast (not both!)
+    [dict(type='Brightness',  prob=0.6, level=7, min_mag=0.8, max_mag=1.25)],  # Giảm prob 0.8→0.6, range moderate
+    [dict(type='Contrast',    prob=0.6, level=7, min_mag=0.8, max_mag=1.3)],   # Giảm prob 0.8→0.6, range moderate
+    [dict(type='Sharpness',   prob=0.4, level=6, min_mag=0.8, max_mag=1.5)],   # Giảm range extreme (2.0→1.5)
+    [dict(type='Posterize',   prob=0.2, level=5, min_mag=5.0, max_mag=7.0)],   # Giảm prob, tăng bits (less extreme)
 ]
 geometric = [
-    # Rotate trong khoảng ±5°
-    [dict(type='Rotate',     prob=0.3, level=7, min_mag=0.0,  max_mag=5.0)],
-    # Shear nhẹ ~ ±3°
-    [dict(type='ShearX',     prob=0.3, level=7, min_mag=0.0,  max_mag=3.0)],
-    [dict(type='ShearY',     prob=0.3, level=7, min_mag=0.0,  max_mag=3.0)],
-    # Translate tối đa 5% kích thước
-    [dict(type='TranslateX', prob=0.3, level=7, min_mag=0.0,  max_mag=0.05)],
-    [dict(type='TranslateY', prob=0.3, level=7, min_mag=0.0,  max_mag=0.05)],
+    # REMOVED: Rotate, ShearX, ShearY
+    # Reason: Conflict with radial crop pattern + MVViT cross-view attention
+    
+    # KEEP: Translation (safe for multi-view)
+    [dict(type='TranslateX', prob=0.3, level=7, min_mag=0.0, max_mag=0.05)],
+    [dict(type='TranslateY', prob=0.3, level=7, min_mag=0.0, max_mag=0.05)],
 ]
-
 
 # Single scale for resize operations (width, height)
 # Note: Use single scale for simplicity. For multi-scale training, use RandomResize instead
@@ -298,14 +302,16 @@ weak_pipeline = [
 
 # pipeline used to augment unlabeled data strongly,
 # which will be sent to student model for unsupervised training.
+# STRONG AUGMENTATION: aug_num=2 for color (combine multiple color transforms)
+# This forces student to learn robust features invariant to appearance changes
 strong_pipeline = [
     dict(type='Resize', scale=img_scale, keep_ratio=True),
     dict(type='RandomFlip', prob=0.5),
     dict(
         type='RandomOrder',
         transforms=[
-            dict(type='RandAugment', aug_space=color_space, aug_num=1),
-            dict(type='RandAugment', aug_space=geometric, aug_num=1),
+            dict(type='RandAugment', aug_space=color_space, aug_num=2),  # INCREASED 1→2 for stronger augmentation
+            dict(type='RandAugment', aug_space=geometric, aug_num=1),    # Keep 1 (only 2 ops: TranslateX/Y)
         ]),
     dict(type='RandomErasing', n_patches=(1, 3), ratio=(0, 0.15)),
     dict(type='FilterAnnotations', min_gt_bbox_wh=(4, 4)),
@@ -385,14 +391,19 @@ train_dataloader = dict(
     sampler=dict(
         type='GroupMultiSourceSampler',
         batch_size=batch_size,
-        source_ratio=[1, 3]),
+        # source_ratio=[1, 1] means 1 labeled + 1 unlabeled per batch
+        # Note: with batch_size=2, ratio [1, 3] would compute as:
+        #   labeled: int(2*1/4)=0 → adjusted to 1, unlabeled: int(2*3/4)=1
+        #   → actual ratio is [1, 1], not [1, 3]!
+        # For true [1, 3] ratio, need batch_size=4 (1 labeled + 3 unlabeled)
+        source_ratio=[1, 1]),  # 1:1 ratio for batch_size=2 (labeled:unlabeled)
     collate_fn=dict(type='mmdet.datasets.wrappers.multi_view_from_folder.multi_view_collate_flatten'),
     dataset=dict(type='ConcatDataset', datasets=[labeled_dataset, unlabeled_dataset]))
 
 
 # training 
 train_cfg = dict(
-    type='IterBasedTrainLoop', max_iters=40000, val_interval=5000)
+    type='IterBasedTrainLoop', max_iters=100000, val_interval=10000)
 val_cfg = dict(type='TeacherStudentValLoop')
 test_cfg = dict(type='TestLoop')
 
@@ -410,7 +421,7 @@ val_dataloader = dict(
         type='MultiViewFromFolder',
         data_root=data_root ,
         views_per_sample=views_per_sample,
-        ann_file=data_root + 'anno_valid/_annotations_filtered.coco.json',
+        ann_file=data_root + 'anno_valid/_annotations_filtered.bright.coco.json',
         data_prefix=dict(img='valid/'),
         test_mode=True,
         pipeline=test_pipeline,
@@ -420,7 +431,7 @@ val_dataloader = dict(
 
 val_evaluator = dict(
     type='MultiViewCocoMetric',
-    ann_file=data_root + 'anno_valid/_annotations_filtered.coco.json',  # Must match dataset ann_file!
+    ann_file=data_root + 'anno_valid/_annotations_filtered.bright.coco.json',  # Must match dataset ann_file!
     metric='bbox',
     format_only=False,
     classwise=True,  # Show per-class AP
@@ -433,7 +444,7 @@ val_evaluator = dict(
     # MVViT still learns cross-view relationships during training!
     aggregation='none',  # 'none' = per-crop evaluation, no aggregation
     enable_aggregation=False,  # Disable aggregation completely
-    nms_iou_thr=0.5,    # IoU threshold for clustering overlapping boxes
+    nms_iou_thr=0.4,    # IoU threshold for clustering overlapping boxes
     extract_base_name=True  # Extract base image name from crop filenames
 )
 
@@ -441,20 +452,35 @@ val_evaluator = dict(
 test_dataloader = val_dataloader
 test_evaluator = val_evaluator
 
-# Learning rate scheduler:
-# 1. Warmup (0-7000 iters): Linear warmup from 0.01*lr to lr
-# 2. Main training (7000-40000 iters): Cosine annealing from lr to 0.1*lr
-# Strategy: Slower LR decay helps stabilize pseudo-label learning
+# Learning rate scheduler: HYBRID strategy for semi-supervised learning
+# Strategy: Warmup + High LR plateau + Smooth decay
+# This combines benefits of exploration (high LR) and convergence (cosine decay)
+# 
+# Phase 1 (0-10k):   Warmup - Linear increase from 0.01×lr to lr
+#                     → Stable initialization, prevent early divergence
+# Phase 2 (10k-80k):  High LR plateau - Constant lr=5e-4
+#                     → Explore feature space, pseudo-labels improve over time
+#                     → 70k iters at high LR helps hard classes (Severe_Rust, Chipped)
+# Phase 3 (80k-120k): Cosine decay - Smooth decrease to 0.1×lr
+#                     → Converge to optimal solution, no sudden drops
+#                     → Better for teacher-student consistency
+# 
+# Benefits over pure CosineAnnealing:
+# - Longer exploration phase (70k vs 90k, but at constant high LR)
+# - Clear convergence phase (40k iters of smooth decay)
+# - Better for semi-supervised: pseudo-labels stabilize during plateau
+# 
+# Benefits over MultiStepLR:
+# - Smooth decay (no sudden drops that disrupt teacher-student EMA)
+# - Reasonable final LR (5e-5, not too low like 5e-6)
+# - Moderate training time (100k vs 180k)
 param_scheduler = [
-    dict(type='LinearLR', start_factor=0.01, by_epoch=False, begin=0, end=7000),
-    dict(
-        type='CosineAnnealingLR',
-        by_epoch=False,      # Iter-based (not epoch-based)
-        begin=7000,          # Start after warmup
-        end=40000,           # End of training
-        eta_min=5e-5         # Final LR = 0.1 * base_lr (5e-5 / 5e-4)
-        # NOTE: convert_to_iter_based removed (only for by_epoch=True)
-    )
+    # Phase 1: Warmup (0-10k)
+    dict(type='LinearLR', start_factor=0.01, by_epoch=False, begin=0, end=10000),
+    # Phase 2: High LR plateau for exploration (10k-70k)
+    dict(type='ConstantLR', factor=1.0, by_epoch=False, begin=10000, end=70000),
+    # Phase 3: Cosine decay for convergence (70k-100k)
+    dict(type='CosineAnnealingLR', by_epoch=False, begin=70000, end=100000, eta_min=5e-5),
 ]
 
 # Mixed precision disabled due to NMS dtype mismatch (Half vs Float)
@@ -467,7 +493,6 @@ optim_wrapper = dict(
     type='OptimWrapper',  # FP32 training
     optimizer=dict(type='SGD', lr=0.0005, momentum=0.9, weight_decay=0.0001)
 )
-
 
 # ✅ CORRECT: momentum=0.999 (Exponential Moving Average - EMA)
 # Formula in MeanTeacherHook: teacher = momentum * teacher + (1-momentum) * student

@@ -58,8 +58,8 @@ if __name__ == '__main__':
     print("Filtering LABELED dataset (60% split)")
     print("="*80)
     filter_bright_images(
-        '/home/coder/data/trong/KLTN/Soft_Teacher/data_drill/anno_test/_annotations_filtered.coco.json',
-        '/home/coder/data/trong/KLTN/Soft_Teacher/data_drill/anno_test/_annotations_filtered.bright.coco.json'
+        '/home/coder/data/trong/KLTN/Soft_Teacher/data_drill/anno_valid/_annotations_filtered.coco.json',
+        '/home/coder/data/trong/KLTN/Soft_Teacher/data_drill/anno_valid/_annotations_filtered.bright.coco.json'
     )
     
     print("\n" + "="*80)

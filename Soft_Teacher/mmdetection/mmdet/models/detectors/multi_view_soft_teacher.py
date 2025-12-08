@@ -1,10 +1,13 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 """Multi-View SoftTeacher for semi-supervised object detection with multiple views."""
 import copy
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
+from collections import defaultdict
 
 import torch
+import numpy as np
 from mmengine.structures import InstanceData
+from mmengine.logging import print_log
 from torch import Tensor
 
 from mmdet.models.utils import (filter_gt_instances, rename_loss_dict,
@@ -69,6 +72,12 @@ class MultiViewSoftTeacher(SoftTeacher):
         # treat each crop independently since each has its own GT
         assert aggregate_views in {'mean', 'sum', 'max'}, \
             f"aggregate_views must be 'mean', 'sum', or 'max', got {aggregate_views}"
+        
+        # Multi-view cross-view uncertainty (rotation-invariant consensus)
+        # For rotation views: use class-level agreement instead of IoU-based matching
+        self.consensus_cfg = {
+            'enable': semi_train_cfg.get('enable_consensus', True) if semi_train_cfg else True,
+        }
 
     def loss_by_pseudo_instances(self,
                                  batch_inputs: Tensor,
@@ -220,8 +229,9 @@ class MultiViewSoftTeacher(SoftTeacher):
         # Problem: Teacher generates too many boxes → FG:BG ratio very low
         # Solution: Keep only top-K boxes per image (sorted by score)
         # GT statistics: mean=1.44, median=1.0, max=6 boxes/img
-        # 15 boxes = 2.5x max GT → provides buffer for rare classes without excessive noise
-        max_boxes_per_image = 15
+        # ANALYSIS: Was 15 boxes (10x GT mean) → overprediction, high FP rate
+        # FIX: Reduce to 10 boxes (7x GT mean) → better precision/recall balance
+        max_boxes_per_image = 10
         for data_samples in batch_data_samples:
             if len(data_samples.gt_instances.bboxes) > max_boxes_per_image:
                 # Sort by score descending, keep top-K
@@ -246,9 +256,23 @@ class MultiViewSoftTeacher(SoftTeacher):
         reg_uncs_list = self.compute_uncertainty_with_aug(
             x, batch_data_samples)
 
-        # Project bboxes and assign uncertainties
-        for data_samples, reg_uncs in zip(batch_data_samples, reg_uncs_list):
-            data_samples.gt_instances['reg_uncs'] = reg_uncs
+        # CROSS-VIEW UNCERTAINTY: Measure prediction consistency across views
+        # For rotation multi-view: same defect should be predicted by multiple views
+        # High cross-view variance → uncertain prediction → lower weight
+        cross_view_uncs = self._compute_cross_view_uncertainty(
+            batch_data_samples, reg_uncs_list)
+
+        # Project bboxes and assign uncertainties (original + cross-view)
+        for idx, (data_samples, reg_uncs, cv_uncs) in enumerate(
+                zip(batch_data_samples, reg_uncs_list, cross_view_uncs)):
+            # Combine bbox uncertainty with cross-view uncertainty
+            # Strategy: Weight cross-view heavily (0.6) to leverage multi-view information
+            # - reg_uncs: bbox localization uncertainty from jitter (range ~0.01-0.1)
+            # - cv_uncs: class-level agreement (0=all views agree, 1=only this view)
+            # - High cv_unc (e.g. 1.0) = likely false positive → should dominate
+            # - Low cv_unc (e.g. 0.0) = strong multi-view support → trust it
+            combined_uncs = reg_uncs + cv_uncs * 0.6  # INCREASED from 0.5 → multi-view dominant
+            data_samples.gt_instances['reg_uncs'] = combined_uncs
             data_samples.gt_instances.bboxes = bbox_project(
                 data_samples.gt_instances.bboxes,
                 torch.from_numpy(data_samples.homography_matrix).inverse().to(
@@ -360,3 +384,203 @@ class MultiViewSoftTeacher(SoftTeacher):
         """
         # Call parent implementation
         return super().compute_uncertainty_with_aug(x, batch_data_samples)
+    
+    def _group_predictions_by_base_img(self, batch_data_samples: SampleList) -> Dict[str, List[int]]:
+        """Group view indices by base_img_id.
+        
+        Args:
+            batch_data_samples: List of DetDataSample (length B*V)
+            
+        Returns:
+            Dict mapping base_img_id -> list of view indices in batch
+        """
+        groups = defaultdict(list)
+        for idx, ds in enumerate(batch_data_samples):
+            # Try to get base_img_id from metainfo first
+            base_img_id = getattr(ds, 'base_img_id', None)
+            if base_img_id is None:
+                # Fallback: extract from img_path/file_name if available
+                img_path = getattr(ds, 'img_path', None) or getattr(ds, 'file_name', None)
+                if img_path:
+                    # Extract base_img_id from filename like "S136_bright_4_crop_8.jpg"
+                    import re
+                    stem = img_path.split('.')[0].split('/')[-1]
+                    match1 = re.search(r"(S\d+)", stem)
+                    match2 = re.search(r"(bright|dark)_\d", stem)
+                    if match1 and match2:
+                        base_img_id = f"{match1.group(0)}_{match2.group(0)}"
+            
+            if base_img_id:
+                groups[base_img_id].append(idx)
+            else:
+                # If still no base_img_id, treat as single view
+                groups[f"view_{idx}"].append(idx)
+        
+        return dict(groups)
+    
+    def _compute_cross_view_uncertainty(self,
+                                       batch_data_samples: SampleList,
+                                       reg_uncs_list: List[Tensor]) -> List[Tensor]:
+        """Compute cross-view uncertainty for pseudo-labels.
+        
+        For rotation multi-view: measure how consistent predictions are across views.
+        - If a defect is predicted by many views → low uncertainty
+        - If predicted by only 1 view → high uncertainty (might be false positive)
+        
+        Strategy: Count how many other views predict same class at ANY location
+        (can't use IoU for rotated views, so use class-level statistics)
+        
+        ENHANCED: Also consider prediction confidence distribution across views
+        - If views have similar confidence → additional trust boost
+        - If confidence varies wildly → increase uncertainty
+        
+        Args:
+            batch_data_samples: List of DetDataSample (length B*V)
+            reg_uncs_list: List of bbox uncertainties per view
+            
+        Returns:
+            List of cross-view uncertainties (same structure as reg_uncs_list)
+        """
+        groups = self._group_predictions_by_base_img(batch_data_samples)
+        cross_view_uncs = []
+        
+        for idx, data_samples in enumerate(batch_data_samples):
+            num_boxes = len(data_samples.gt_instances.bboxes)
+            if num_boxes == 0:
+                # No predictions → no uncertainty
+                cross_view_uncs.append(torch.zeros(0, device=reg_uncs_list[idx].device))
+                continue
+            
+            # Find which group this view belongs to
+            base_img_id = None
+            view_indices = []
+            for gid, vindices in groups.items():
+                if idx in vindices:
+                    base_img_id = gid
+                    view_indices = vindices
+                    break
+            
+            if len(view_indices) < 2:
+                # Single view or not grouped → max uncertainty
+                cross_view_uncs.append(
+                    torch.ones(num_boxes, device=reg_uncs_list[idx].device) * 0.5)
+                continue
+            
+            # Count how many views predict each class
+            labels = data_samples.gt_instances.labels
+            scores = data_samples.gt_instances.scores
+            class_support = torch.zeros(num_boxes, device=labels.device)
+            score_consistency = torch.zeros(num_boxes, device=labels.device)
+            
+            for box_idx, label in enumerate(labels):
+                # Count views that predict this class
+                # Note: roi_head.predict() only returns foreground classes [0, num_classes-1]
+                # so no need to check for background
+                views_with_class = 0
+                other_scores = []
+                
+                for view_idx in view_indices:
+                    if view_idx == idx:
+                        continue  # Skip self
+                    view_labels = batch_data_samples[view_idx].gt_instances.labels
+                    view_scores = batch_data_samples[view_idx].gt_instances.scores
+                    
+                    if len(view_labels) > 0:
+                        # All labels from roi_head.predict() are foreground
+                        class_mask = (view_labels == label)
+                        if class_mask.any():
+                            views_with_class += 1
+                            # Collect scores for this class from other views
+                            other_scores.append(view_scores[class_mask].mean())
+                
+                # Normalize by total views (excluding self)
+                class_support[box_idx] = views_with_class / max(len(view_indices) - 1, 1)
+                
+                # ENHANCED: Check score consistency across views
+                if len(other_scores) > 0:
+                    other_scores = torch.stack(other_scores)
+                    my_score = scores[box_idx]
+                    # If scores are similar → low variance → more consistent
+                    score_std = torch.cat([other_scores, my_score.unsqueeze(0)]).std()
+                    # Normalize std to [0, 1]: std=0 (perfect) → 0, std>0.3 (inconsistent) → 1
+                    score_consistency[box_idx] = torch.clamp(score_std / 0.3, 0, 1)
+                else:
+                    score_consistency[box_idx] = 1.0  # No other views → max inconsistency
+            
+            # Convert support to uncertainty: high support → low uncertainty
+            # support=0 (only this view) → unc=1.0
+            # support=1 (all views agree) → unc=0.0
+            class_unc = 1.0 - class_support
+            
+            # Combine class uncertainty with score consistency
+            # Both contribute to overall uncertainty
+            uncertainties = (class_unc + score_consistency) / 2.0
+            cross_view_uncs.append(uncertainties)
+        
+        return cross_view_uncs
+    
+    @torch.no_grad()
+    def get_pseudo_instances_with_consensus(self,
+                                           batch_inputs: Tensor,
+                                           batch_data_samples: SampleList) -> Tuple[SampleList, Optional[dict]]:
+        """Get pseudo instances with cross-view uncertainty weighting.
+        
+        For rotation multi-view: uncertainty is already computed and added to reg_uncs
+        in get_pseudo_instances(). This function just logs statistics.
+        
+        Args:
+            batch_inputs (Tensor): Shape (B*V, C, H, W)
+            batch_data_samples (SampleList): Length B*V
+            
+        Returns:
+            Tuple of (samples with uncertainty-weighted pseudo-labels, batch_info)
+        """
+        # Get pseudo-labels with cross-view uncertainty already computed
+        batch_data_samples, batch_info = self.get_pseudo_instances(
+            batch_inputs, batch_data_samples)
+        
+        if not self.consensus_cfg['enable']:
+            return batch_data_samples, batch_info
+        
+        # Log cross-view statistics
+        if not hasattr(self, '_consensus_log_count'):
+            self._consensus_log_count = 0
+        self._consensus_log_count += 1
+        
+        if self._consensus_log_count % 50 == 1:
+            groups = self._group_predictions_by_base_img(batch_data_samples)
+            
+            # Compute per-group uncertainty statistics
+            group_stats = []
+            for gid, vindices in groups.items():
+                group_uncs = []
+                group_boxes = 0
+                for view_idx in vindices:
+                    ds = batch_data_samples[view_idx]
+                    if len(ds.gt_instances.bboxes) > 0 and hasattr(ds.gt_instances, 'reg_uncs'):
+                        group_uncs.append(ds.gt_instances.reg_uncs)
+                        group_boxes += len(ds.gt_instances.bboxes)
+                
+                if len(group_uncs) > 0:
+                    group_uncs = torch.cat(group_uncs, dim=0)
+                    group_stats.append({
+                        'gid': gid,
+                        'boxes': group_boxes,
+                        'mean': group_uncs.mean().item(),
+                        'median': group_uncs.median().item(),
+                        'min': group_uncs.min().item(),
+                        'max': group_uncs.max().item()
+                    })
+            
+            # Log per-group statistics
+            if len(group_stats) > 0:
+                stats_str = " | ".join([
+                    f"G{i}:{s['boxes']}box(unc={s['mean']:.3f})" 
+                    for i, s in enumerate(group_stats)
+                ])
+                print_log(
+                    f"[Cross-View Uncertainty] Groups: {len(groups)}, {stats_str}",
+                    logger='current'
+                )
+        
+        return batch_data_samples, batch_info

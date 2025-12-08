@@ -36,12 +36,12 @@ SOLVER:
   CHECKPOINT_PERIOD: 50000
 DATALOADER:
   SUP_PERCENT: 10.0
-  RANDOM_DATA_SEED: 42
+  RANDOM_DATA_SEED: 567
   NUM_WORKERS: 4
 DATASETS:
   CROSS_DATASET: False
   TRAIN: ("TRAIN_DATASET",)
-  TEST: ("TEST_DATASET",)
+  TEST: ("VAL_DATASET",)
 SEMISUPNET:
   Trainer: "ubteacher"
   BBOX_THRESHOLD: 0.5
@@ -56,4 +56,4 @@ INPUT:
   MAX_SIZE_TEST: 720
 TEST:
   EVAL_PERIOD: 5000
-OUTPUT_DIR: "/home/coder/data/trong/KLTN/Unbiased_Teacher/work_dirs/eval10_1"
+OUTPUT_DIR: "/home/coder/data/trong/KLTN/Unbiased_Teacher/work_dirs/output10_3"
