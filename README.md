@@ -22,32 +22,47 @@ KLTN/
 │   ├── mmdetection/              # MMDetection framework
 │   ├── mmengine/                 # MMEngine core
 │   ├── tools/                    # Training & inference tools
-│   └── work_dirs/                # Trained models & logs
+│   ├── work_dirs/                # Trained models & logs
+│   └── train_v3_20.ipynb         # Training notebook
 ├── 🤖 Soft_Teacher_SingleView/   # Soft Teacher Single View version
 ├── 🤖 Unbiased_Teacher/          # Thuật toán Unbiased Teacher
 │   ├── configs/                  # Configuration files
 │   ├── ubteacher/                # Core module
-│   └── output/                   # Training outputs
+│   ├── output/                   # Training outputs
+│   └── inferences/               # Inference results
 ├── 🤖 Semi-DETR/                 # Semi-supervised DETR
 │   ├── configs/                  # Configuration files
 │   ├── detr_od/                  # Object detection module
-│   └── detr_ssod/                # Semi-supervised module
+│   ├── detr_ssod/                # Semi-supervised module
+│   └── tools/                    # Training & utility tools
 ├── 🤖 DETR_Mixup/                # DETR với MixPL augmentation
 │   ├── MixPL/                    # MixPL module
-│   └── mmdetection/              # MMDetection framework
+│   ├── mmdetection/              # MMDetection framework
+│   └── train.ipynb               # Training notebook
+├── 🔧 PreProcessing/             # Tiền xử lý dữ liệu
+│   ├── Instance_Segmentation_Yolov8.ipynb  # Segmentation notebook
+│   └── convertSegmentToBBoxVer2.ipynb      # Convert segment to bbox
+├── 🔧 yolov11n_train_head_drill/ # YOLOv11 training cho head drill
+│   └── train_yolo_head_drill.ipynb         # Training notebook
 ├── 📊 data_drill/                # Dataset mũi khoan v1
 │   ├── train/                    # Training images
 │   ├── valid/                    # Validation images
 │   ├── anno_train/               # Training annotations
-│   └── anno_valid/               # Validation annotations
+│   ├── anno_valid/               # Validation annotations
+│   ├── semi_anns/                # Semi-supervised annotations
+│   └── semi_anno_multiview/      # Multi-view annotations
 ├── 📊 data_drill_2/              # Dataset mũi khoan v2
 ├── 📊 data_drill_3/              # Dataset mũi khoan v3 (có test set)
 ├── 🌐 web/                       # Web application chính
 │   ├── app.py                    # Flask backend
 │   ├── static/                   # CSS, JS, assets
-│   └── templates/                # HTML templates
+│   ├── templates/                # HTML templates
+│   └── info.gif                  # Demo animation
 ├── 🌐 data_web/                  # Web application phụ
-└── 📖 document/                  # Tài liệu và hướng dẫn
+├── 📖 document/                  # Tài liệu và hướng dẫn
+├── 📄 analysis_anno.py           # Script phân tích annotations
+├── 📄 filter_annotations.py      # Script lọc annotations
+└── 📄 inference.py               # Script inference
 ```
 
 ## 🚀 Công nghệ sử dụng
