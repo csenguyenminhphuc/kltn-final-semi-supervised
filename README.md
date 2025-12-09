@@ -24,7 +24,7 @@ Dataset ảnh mũi khoan được sử dụng để huấn luyện và đánh gi
 **Thông tin dataset**:
 - **Số lượng ảnh**: Đa dạng ảnh mũi khoan từ nhiều góc nhìn
 - **Định dạng**: COCO format annotations
-- **Số lớp**: 5 loại lỗi (Gay, Me, Mon_dau, Ri_set, Xuoc_than)
+- **Số lớp**: 5 loại lỗi (Gay, Me, Mon_dau, Ri_set, Xuoc)
 - **Chia tập**: Train / Validation / Test
 
 ## 🖥️ Giám sát hệ thống
@@ -117,7 +117,7 @@ KLTN/
 
 ## 👥 Đội ngũ phát triển
 
-### 🔧 Nguyễn Minh Phúc - DevSecOps AI Engineer
+### 🔧 Nguyễn Minh Phúc - DevSecOps & Infrastructure Engineer
 **Vai trò**: Machine Learning Engineer & DevOps Specialist
 
 **Chuyên môn**:
