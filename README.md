@@ -6,6 +6,8 @@
 
 Hệ thống này được phát triển để tự động phát hiện và phân loại các loại lỗi trên mũi khoan trong môi trường sản xuất công nghiệp sử dụng công nghệ học sâu bán giám sát (Semi-supervised Deep Learning). Với khả năng xử lý ảnh đa góc nhìn, hệ thống đạt độ chính xác cao và có thể triển khai trong thực tế.
 
+![Demo hệ thống](web/info.gif)
+
 ### 🎯 Mục tiêu dự án
 - Phát hiện tự động các lỗi mũi khoan: **Gay**, **Me**, **Mon_dau**, **Ri_set**, **Xuoc_than**
 - Tối ưu quy trình kiểm tra chất lượng trong sản xuất

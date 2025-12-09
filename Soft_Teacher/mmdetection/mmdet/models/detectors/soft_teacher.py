@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple
 
 import torch
 from mmengine.structures import InstanceData
+from mmengine.logging import print_log
 from torch import Tensor
 
 from mmdet.models.utils import (filter_gt_instances, rename_loss_dict,
@@ -336,6 +337,19 @@ class SoftTeacher(SemiBaseDetector):
             x, auged_results_list, batch_data_samples, rescale=False)
         self.teacher.roi_head.test_cfg = self.teacher.test_cfg.rcnn
 
+        # CRITICAL: Verify results_list size matches input
+        # With test_cfg=None, roi_head should return all boxes without NMS
+        for idx, (auged, results) in enumerate(zip(auged_results_list, results_list)):
+            expected_size = auged.bboxes.shape[0]
+            actual_size = results.bboxes.shape[0]
+            if expected_size != actual_size:
+                print_log(
+                    f"roi_head.predict() size mismatch at idx {idx}: "
+                    f"input {expected_size} boxes but got {actual_size} results. "
+                    f"This should not happen with test_cfg=None!",
+                    logger='current', level='INFO'
+                )
+
         reg_channel = max(
             [results.bboxes.shape[-1] for results in results_list]) // 4
         bboxes = [
@@ -352,6 +366,32 @@ class SoftTeacher(SemiBaseDetector):
             data_samples.gt_instances.labels
             for data_samples in batch_data_samples
         ]
+        
+        # CRITICAL FIX: Ensure bboxes and labels have same length
+        # teacher.roi_head.predict() may return different number of boxes due to NMS/filtering
+        for idx, (bbox, label) in enumerate(zip(bboxes, labels)):
+            if bbox.shape[0] != label.shape[0]:
+                # This should not happen, but if it does, we need to handle it
+                # Most likely: roi_head.predict() filtered some boxes
+                # Solution: Use the minimum size and truncate both
+                min_size = min(bbox.shape[0], label.shape[0])
+                if min_size == 0:
+                    # No boxes left after filtering → keep empty tensor
+                    bboxes[idx] = bbox[:0]
+                    box_unc[idx] = box_unc[idx][:0]
+                    labels[idx] = label[:0]
+                else:
+                    # Truncate to min size
+                    bboxes[idx] = bbox[:min_size]
+                    box_unc[idx] = box_unc[idx][:min_size]
+                    labels[idx] = label[:min_size]
+                    print_log(
+                        f"compute_uncertainty_with_aug size mismatch at idx {idx}: "
+                        f"bbox.shape[0]={bbox.shape[0]} but label.shape[0]={label.shape[0]}. "
+                        f"Truncated to {min_size}.",
+                        logger='current', level='INFO'
+                    )
+        
         if reg_channel != 1:
             bboxes = [
                 bbox.reshape(bbox.shape[0], reg_channel,
