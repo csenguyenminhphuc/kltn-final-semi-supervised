@@ -14,6 +14,31 @@ Hệ thống này được phát triển để tự động phát hiện và ph�
 - Giảm thiểu sai sót do con người và tăng hiệu quả sản xuất
 - Ứng dụng công nghệ AI tiên tiến vào thực tiễn công nghiệp
 
+## 📦 Dataset
+
+### Drill Bit Dataset
+Dataset ảnh mũi khoan được sử dụng để huấn luyện và đánh giá mô hình trong dự án này.
+
+🔗 **Link Dataset**: [Kaggle - Drill Bit Dataset](https://www.kaggle.com/datasets/csenguyenminhphuc/drill-bit-dataset)
+
+**Thông tin dataset**:
+- **Số lượng ảnh**: Đa dạng ảnh mũi khoan từ nhiều góc nhìn
+- **Định dạng**: COCO format annotations
+- **Số lớp**: 5 loại lỗi (Gay, Me, Mon_dau, Ri_set, Xuoc_than)
+- **Chia tập**: Train / Validation / Test
+
+## 🖥️ Giám sát hệ thống
+
+Công cụ giám sát server và website hệ thống:
+
+🔗 **Server Monitoring Suite Agent**: [GitHub Repository](https://github.com/csenguyenminhphuc/ServerMonitoringSuite-Agent)
+
+**Tính năng**:
+- Giám sát trạng thái server real-time
+- Theo dõi tài nguyên hệ thống (CPU, RAM, Disk)
+- Cảnh báo khi có sự cố
+- Dashboard trực quan
+
 ## 🏗️ Kiến trúc hệ thống
 
 ```
@@ -199,6 +224,29 @@ POST /predict          # Dự đoán lỗi từ ảnh upload
 GET  /uploads/<file>    # Truy cập ảnh đã upload  
 GET  /output/<file>     # Truy cập kết quả dự đoán
 ```
+## 📊 Hiệu suất mô hình
+
+### Kết quả đánh giá tại Iteration 60,000
+
+| Phương pháp | 10% Labeled |  |  | 20% Labeled |  |  | 40% Labeled |  |  |
+|:------------|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
+| **Metrics** | **mAP** | **mAP50** | **mAP75** | **mAP** | **mAP50** | **mAP75** | **mAP** | **mAP50** | **mAP75** |
+| Supervised | 18.51 | 46.76 | 11.49 | 21.23 | 50.47 | 12.40 | 26.00 | 59.78 | 16.82 |
+| Unbiased Teacher | 24.2 | 63.1 | 13.1 | 27.4 | 67.7 | 14.6 | 30.4 | 72.1 | 19.1 |
+| Soft Teacher | 16.5 | 40.8 | 11.0 | 20.8 | 51.6 | 11.6 | 25.8 | 62.1 | 15.1 |
+| **MixPL** | 33.4 | **68.7** | 27.8 | 36.3 | **71.6** | 31.8 | 40.2 | **76.0** | 37.8 |
+| Multi View với Soft Teacher | 20.6 | 55.8 | 15.1 | 23.4 | 65.7 | 18.6 | 30.8 | 73.1 | 20.1 |
+
+> 📌 **Ghi chú**: 
+> - **mAP**: Mean Average Precision (độ chính xác trung bình)
+> - **mAP50**: mAP tại IoU threshold 0.5
+> - **mAP75**: mAP tại IoU threshold 0.75
+> - Giá trị **in đậm** là kết quả tốt nhất trong từng cột
+
+### Nhận xét kết quả
+- **MixPL** đạt hiệu suất cao nhất ở tất cả các tỷ lệ dữ liệu có nhãn (10%, 20%, 40%)
+- Với 40% labeled data, MixPL đạt **mAP50 = 76.0%**, vượt trội so với các phương pháp khác
+- **Unbiased Teacher** cho kết quả tốt thứ hai, đặc biệt hiệu quả với lượng dữ liệu có nhãn thấp
 
 ### Các lỗi có thể phát hiện:
 - 🔩 **Gay**: Lỗi gãy mũi khoan
@@ -255,6 +303,7 @@ Dự án này được phát triển cho mục đích giáo dục và nghiên c�
 ![IUH LOGO](https://iuh.edu.vn/assets/images/icons/logo.svg?v=51)
 - Khoa Học Máy Tính - Khoa Công Nghệ Thông Tin - Đại Học Công Nghiệp Thành Phố Hồ Chí Minh 
 - Framework Detectron2 by Facebook AI Research
+- Framework MMDetection, MMEngine by OpenMMLab
 - Semi-supervised Learning Community
 - All contributors and supporters
 
