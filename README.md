@@ -228,7 +228,7 @@ GET  /output/<file>     # Truy cập kết quả dự đoán
 
 ### Kết quả đánh giá tại Iteration 60,000
 
-| Phương pháp | 10% Labeled |  |  | 20% Labeled |  |  | 40% Labeled |  |  |
+| Phương pháp | 10% Labeled | 10% Labeled | 10% Labeled | 20% Labeled | 20% Labeled | 20% Labeled | 40% Labeled | 40% Labeled | 40% Labeled |
 |:------------|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
 | **Metrics** | **mAP** | **mAP50** | **mAP75** | **mAP** | **mAP50** | **mAP75** | **mAP** | **mAP50** | **mAP75** |
 | Supervised | 18.51 | 46.76 | 11.49 | 21.23 | 50.47 | 12.40 | 26.00 | 59.78 | 16.82 |
