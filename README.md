@@ -9,7 +9,7 @@ Hệ thống này được phát triển để tự động phát hiện và ph�
 ![Demo hệ thống](web/info.gif)
 
 ### 🎯 Mục tiêu dự án
-- Phát hiện tự động các lỗi mũi khoan: **Gay**, **Me**, **Mon_dau**, **Ri_set**, **Xuoc_than**
+- Phát hiện tự động các lỗi mũi khoan: **Gay**, **Me**, **Mon_dau**, **Ri_set**, **Xuoc**
 - Tối ưu quy trình kiểm tra chất lượng trong sản xuất
 - Giảm thiểu sai sót do con người và tăng hiệu quả sản xuất
 - Ứng dụng công nghệ AI tiên tiến vào thực tiễn công nghiệp
