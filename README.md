@@ -190,7 +190,7 @@ GET  /output/<file>     # Truy cập kết quả dự đoán
 - 🔴 **Me**: Lỗi mẻ mũi khoan
 - 🟡 **Mon_dau**: Lỗi mòn đầu khoan  
 - 🔵 **Ri_set**: Lỗi rỉ sét
-- 🟣 **Xuoc_than**: Lỗi xước thân
+- 🟣 **Xuoc**: Lỗi xước
 
 ## 🛠️ Development
 
