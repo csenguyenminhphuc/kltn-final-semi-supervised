@@ -1,11 +1,11 @@
-2025/12/09 07:59:40 - mmengine - INFO - 
+2025/12/09 18:36:41 - mmengine - INFO - 
 ------------------------------------------------------------
 System environment:
     sys.platform: linux
     Python: 3.9.19 (main, May  6 2024, 19:43:03) [GCC 11.2.0]
     CUDA available: True
     MUSA available: False
-    numpy_random_seed: 1653551698
+    numpy_random_seed: 989575180
     GPU 0: NVIDIA RTX A6000
     CUDA_HOME: /usr/local/cuda
     NVCC: Cuda compilation tools, release 12.6, V12.6.85
@@ -34,13 +34,13 @@ Runtime environment:
     cudnn_benchmark: False
     mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
     dist_cfg: {'backend': 'nccl'}
-    seed: 1653551698
+    seed: 989575180
     Distributed launcher: none
     Distributed training: False
     GPU number: 1
 ------------------------------------------------------------
 
-2025/12/09 07:59:43 - mmengine - INFO - Config:
+2025/12/09 18:36:44 - mmengine - INFO - Config:
 backend_args = None
 batch_size = 2
 branch_field = [
@@ -170,7 +170,7 @@ detector = dict(
             in_channels=256,
             loss_bbox=dict(loss_weight=1.0, type='L1Loss'),
             loss_cls=dict(
-                alpha=0.5,
+                alpha=0.65,
                 gamma=2.2,
                 loss_weight=1.5,
                 type='FocalLoss',
@@ -230,7 +230,7 @@ detector = dict(
         in_channels=256,
         loss_bbox=dict(loss_weight=1.0, type='L1Loss'),
         loss_cls=dict(
-            alpha=0.5,
+            alpha=0.65,
             gamma=2.0,
             loss_weight=2.0,
             type='FocalLoss',
@@ -259,9 +259,9 @@ detector = dict(
             pos_weight=-1,
             sampler=dict(
                 add_gt_as_proposals=True,
-                neg_pos_ub=2,
+                neg_pos_ub=1.5,
                 num=256,
-                pos_fraction=0.6,
+                pos_fraction=0.7,
                 type='RandomSampler')),
         rpn=dict(
             allowed_border=-1,
@@ -276,9 +276,9 @@ detector = dict(
             pos_weight=-1,
             sampler=dict(
                 add_gt_as_proposals=False,
-                neg_pos_ub=2,
+                neg_pos_ub=1.5,
                 num=256,
-                pos_fraction=0.6,
+                pos_fraction=0.7,
                 type='RandomSampler')),
         rpn_proposal=dict(
             max_per_img=1000,
@@ -548,7 +548,7 @@ model = dict(
                 in_channels=256,
                 loss_bbox=dict(loss_weight=1.0, type='L1Loss'),
                 loss_cls=dict(
-                    alpha=0.5,
+                    alpha=0.65,
                     gamma=2.2,
                     loss_weight=1.5,
                     type='FocalLoss',
@@ -609,7 +609,7 @@ model = dict(
             in_channels=256,
             loss_bbox=dict(loss_weight=1.0, type='L1Loss'),
             loss_cls=dict(
-                alpha=0.5,
+                alpha=0.65,
                 gamma=2.0,
                 loss_weight=2.0,
                 type='FocalLoss',
@@ -638,9 +638,9 @@ model = dict(
                 pos_weight=-1,
                 sampler=dict(
                     add_gt_as_proposals=True,
-                    neg_pos_ub=2,
+                    neg_pos_ub=1.5,
                     num=256,
-                    pos_fraction=0.6,
+                    pos_fraction=0.7,
                     type='RandomSampler')),
             rpn=dict(
                 allowed_border=-1,
@@ -655,9 +655,9 @@ model = dict(
                 pos_weight=-1,
                 sampler=dict(
                     add_gt_as_proposals=False,
-                    neg_pos_ub=2,
+                    neg_pos_ub=1.5,
                     num=256,
-                    pos_fraction=0.6,
+                    pos_fraction=0.7,
                     type='RandomSampler')),
             rpn_proposal=dict(
                 max_per_img=1000,
@@ -677,10 +677,10 @@ model = dict(
             8,
         ),
         pseudo_label_initial_score_thr=0.4,
-        reg_pseudo_thr=0.1,
+        reg_pseudo_thr=0.085,
         rpn_pseudo_thr=0.35,
         sup_weight=1.0,
-        unsup_weight=0.5),
+        unsup_weight=1.0),
     type='MultiViewSoftTeacher',
     views_per_sample=8)
 num_workers = 4
@@ -953,7 +953,7 @@ test_evaluator = dict(
     extract_base_name=True,
     format_only=False,
     metric='bbox',
-    nms_iou_thr=0.4,
+    nms_iou_thr=0.5,
     type='MultiViewCocoMetric',
     views_per_sample=8)
 test_pipeline = [
@@ -1698,7 +1698,7 @@ val_evaluator = dict(
     extract_base_name=True,
     format_only=False,
     metric='bbox',
-    nms_iou_thr=0.4,
+    nms_iou_thr=0.5,
     type='MultiViewCocoMetric',
     views_per_sample=8)
 views_per_sample = 8
@@ -1732,10 +1732,10 @@ weak_pipeline = [
 ]
 work_dir = './work_dirs/soft_teacher_custom_multi_view'
 
-2025/12/09 07:59:46 - mmengine - INFO - MultiViewBackbone: Initialized with MVViT fusion, views_per_sample=8
-2025/12/09 07:59:46 - mmengine - INFO - MultiViewBackbone: Initialized with MVViT fusion, views_per_sample=8
-2025/12/09 07:59:47 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
-2025/12/09 07:59:47 - mmengine - INFO - Hooks will be executed in the following order:
+2025/12/09 18:36:47 - mmengine - INFO - MultiViewBackbone: Initialized with MVViT fusion, views_per_sample=8
+2025/12/09 18:36:48 - mmengine - INFO - MultiViewBackbone: Initialized with MVViT fusion, views_per_sample=8
+2025/12/09 18:36:50 - mmengine - INFO - Distributed training is not used, all SyncBatchNorm (SyncBN) layers in the model will be automatically reverted to BatchNormXd layers if they are used.
+2025/12/09 18:36:50 - mmengine - INFO - Hooks will be executed in the following order:
 before_run:
 (VERY_HIGH   ) RuntimeInfoHook                    
 (BELOW_NORMAL) LoggerHook                         
@@ -1821,136 +1821,136 @@ after_test:
 after_run:
 (BELOW_NORMAL) LoggerHook                         
  -------------------- 
-2025/12/09 07:59:50 - mmengine - INFO - [COCO ANNO] Loaded from: /home/coder/data/trong/KLTN/Soft_Teacher/data_drill/semi_anno_multiview/_annotations.coco.labeled.grouped@40.bright.json
-2025/12/09 07:59:50 - mmengine - INFO -   → 1208 images, 1448 annotations
-2025/12/09 07:59:50 - mmengine - INFO -   → 946 files have annotations
-2025/12/09 07:59:50 - mmengine - INFO -   → 1208 files have base_img_id
-2025/12/09 07:59:50 - mmengine - INFO -   → Categories: [0, 1, 2, 3, 4, 5]
-2025/12/09 07:59:50 - mmengine - INFO -   → cat2label mapping: {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
-2025/12/09 07:59:50 - mmengine - INFO -   → File 'S136_Image__2025-09-23__16-42-55_bright_4_crop_8_jpg.rf.8d03a89b2a2643c02b4733eb858e68be.jpg': 1 boxes, base_img_id=S136_bright_4, crop_num=8
-2025/12/09 07:59:50 - mmengine - INFO -   → File 'S40_Image__2025-09-04__16-02-50_bright_2_crop_6_jpg.rf.0006368956fc4380b51ac33ff3fbee7c.jpg': 1 boxes, base_img_id=S40_bright_2, crop_num=6
-2025/12/09 07:59:50 - mmengine - INFO -   → File 'S124_Image__2025-09-23__10-26-03_bright_3_crop_5_jpg.rf.eff0c11d31452dcd01ccb1959ba342f5.jpg': 2 boxes, base_img_id=S124_bright_3, crop_num=5
-2025/12/09 07:59:50 - mmengine - INFO - [COCO] Built 151 groups from base_img_id
-2025/12/09 07:59:50 - mmengine - INFO - [COCO] Total files in COCO JSON: 1208
-2025/12/09 07:59:50 - mmengine - INFO - [COCO] Unique base_img_ids: 151
-2025/12/09 07:59:50 - mmengine - INFO -   → Group 0: base_img_id=S101_bright_2, 8/8 views
-2025/12/09 07:59:50 - mmengine - INFO -   → Group 1: base_img_id=S111_bright_3, 8/8 views
-2025/12/09 07:59:50 - mmengine - INFO -   → Group 2: base_img_id=S111_bright_4, 8/8 views
-2025/12/09 07:59:50 - mmengine - INFO - [COCO ANNO] Loaded from: /home/coder/data/trong/KLTN/Soft_Teacher/data_drill/semi_anno_multiview/_annotations.coco.unlabeled.grouped@40.bright.json
-2025/12/09 07:59:50 - mmengine - INFO -   → 784 images, 956 annotations
-2025/12/09 07:59:50 - mmengine - INFO -   → 649 files have annotations
-2025/12/09 07:59:50 - mmengine - INFO -   → 784 files have base_img_id
-2025/12/09 07:59:50 - mmengine - INFO -   → Categories: [0, 1, 2, 3, 4, 5]
-2025/12/09 07:59:50 - mmengine - INFO -   → cat2label mapping: {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
-2025/12/09 07:59:50 - mmengine - INFO -   → File 'S4_than_Image__2025-09-03__14-00-16_bright_2_crop_3_jpg.rf.93c6a9e3d563bf395cd5c9ef7519b742.jpg': 3 boxes, base_img_id=S4_bright_2, crop_num=3
-2025/12/09 07:59:50 - mmengine - INFO -   → File 'S225_Image__2025-07-01__14-30-51_bright_2_crop_7_jpg.rf.6b508c0dd7ed86aff7e31273da30c5e4.jpg': 2 boxes, base_img_id=S225_bright_2, crop_num=7
-2025/12/09 07:59:50 - mmengine - INFO -   → File 'S78_Image__2025-09-08__16-35-36_bright_3_crop_8_jpg.rf.84d34f89fe2af65f5adacb8437ed2ee6.jpg': 3 boxes, base_img_id=S78_bright_3, crop_num=8
-2025/12/09 07:59:50 - mmengine - INFO - [COCO] Built 98 groups from base_img_id
-2025/12/09 07:59:50 - mmengine - INFO - [COCO] Total files in COCO JSON: 784
-2025/12/09 07:59:50 - mmengine - INFO - [COCO] Unique base_img_ids: 98
-2025/12/09 07:59:50 - mmengine - INFO -   → Group 0: base_img_id=S111_bright_2, 8/8 views
-2025/12/09 07:59:50 - mmengine - INFO -   → Group 1: base_img_id=S114_bright_2, 8/8 views
-2025/12/09 07:59:50 - mmengine - INFO -   → Group 2: base_img_id=S117_bright_2, 8/8 views
-2025/12/09 07:59:50 - mmengine - INFO - [COCO ANNO] Loaded from: /home/coder/data/trong/KLTN/Soft_Teacher/data_drill/anno_valid/_annotations_filtered.bright.coco.json
-2025/12/09 07:59:50 - mmengine - INFO -   → 320 images, 442 annotations
-2025/12/09 07:59:50 - mmengine - INFO -   → 284 files have annotations
-2025/12/09 07:59:50 - mmengine - INFO -   → 320 files have base_img_id
-2025/12/09 07:59:50 - mmengine - INFO -   → Categories: [0, 1, 2, 3, 4, 5]
-2025/12/09 07:59:50 - mmengine - INFO -   → cat2label mapping: {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
-2025/12/09 07:59:50 - mmengine - INFO -   → File 'S245_Image__2025-11-11__12-09-08_bright_2_crop_5_jpg.rf.b0924b8796050c8c09b6c63180a8df2a.jpg': 1 boxes, base_img_id=S245_bright_2, crop_num=5
-2025/12/09 07:59:50 - mmengine - INFO -   → File 'S135_Image__2025-09-23__16-23-02_bright_4_crop_7_jpg.rf.1b8c818ab9826dbcd27a64c2e38414e1.jpg': 2 boxes, base_img_id=S135_bright_4, crop_num=7
-2025/12/09 07:59:50 - mmengine - INFO -   → File 'S242_Image__2025-11-11__11-56-30_bright_8_crop_1_jpg.rf.06e5607648d1e41e35c7bec4fc2eeb57.jpg': 1 boxes, base_img_id=S242_bright_8, crop_num=1
-2025/12/09 07:59:50 - mmengine - INFO - [COCO] Built 40 groups from base_img_id
-2025/12/09 07:59:50 - mmengine - INFO - [COCO] Total files in COCO JSON: 320
-2025/12/09 07:59:50 - mmengine - INFO - [COCO] Unique base_img_ids: 40
-2025/12/09 07:59:50 - mmengine - INFO -   → Group 0: base_img_id=S110_bright_2, 8/8 views
-2025/12/09 07:59:50 - mmengine - INFO -   → Group 1: base_img_id=S110_bright_3, 8/8 views
-2025/12/09 07:59:50 - mmengine - INFO -   → Group 2: base_img_id=S110_bright_4, 8/8 views
-2025/12/09 07:59:50 - mmengine - INFO - MultiViewCocoMetric initialized: PER-CROP evaluation mode (no aggregation, 8 crops evaluated independently)
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 1] File: S76_Image__2025-09-08__15-44-13_bright_2_crop_1_jpg.rf.58478a7f65d7717b15be6110556e7e8a.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [38, 44, 142.34, 147.74], label: 4
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 1] File: S82_Image__2025-09-08__18-14-09_bright_3_crop_1_jpg.rf.424af8b75c6b21792f39c8a52f2d73ac.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [27, 106, 74.89, 319.1], label: 2
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 1] File: S8_than_Image__2025-09-03__14-39-32_bright_3_crop_1_jpg.rf.6cfe7f4254a5989033bff6ad8dd359ae.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [155, 42, 204.3, 283.87], label: 2
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 2] File: S76_Image__2025-09-08__15-44-13_bright_2_crop_3_jpg.rf.221fb19f403d8221a4c72ff07f9c7dde.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [125, 0, 165.01, 72.29], label: 4
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 3] File: S76_Image__2025-09-08__15-44-13_bright_2_crop_4_jpg.rf.44b8ef1ce969a74685938bcce791ebae.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [57, 10, 140.45, 103.8], label: 4
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 2] File: S8_than_Image__2025-09-03__14-39-32_bright_3_crop_2_jpg.rf.b7c8a0a30eb9a439fb5a0e5db3b23113.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [70, 0, 131.577, 241.921], label: 2
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 2] File: S82_Image__2025-09-08__18-14-09_bright_3_crop_3_jpg.rf.18b4a5c87396a2387c97919acb399cca.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [141, 141, 216.29000000000002, 397.45], label: 2
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 3] File: S82_Image__2025-09-08__18-14-09_bright_3_crop_4_jpg.rf.721f1ede7bce2dd70095ca67b2c28834.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [64, 158, 183.82, 403.69], label: 2
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 3] File: S8_than_Image__2025-09-03__14-39-32_bright_3_crop_3_jpg.rf.2db64fde3d4bd15a8e5c0ce2705f1b22.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [21, 87, 60.18, 256.2], label: 2
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 1] File: S142_Image__2025-09-24__11-11-21_bright_2_crop_4_jpg.rf.1140640339faad33dc360aca4eb28832.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 2 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [159, 325, 207.32999999999998, 474.65999999999997], label: 2
-2025/12/09 07:59:50 - mmengine - INFO -     Box 1: [51, 116, 165.9, 202.63], label: 4
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 2] File: S142_Image__2025-09-24__11-11-21_bright_2_crop_5_jpg.rf.f5cb875c5d53567ebd01702b6badb42e.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [99, 320, 171.227, 523.107], label: 2
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 3] File: S142_Image__2025-09-24__11-11-21_bright_2_crop_6_jpg.rf.487abc696967ba514f0cf9eeab49c53c.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [27, 338, 98.54, 515.1759999999999], label: 2
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 1] File: S71_Image__2025-09-22__11-06-14_bright_6_crop_1_jpg.rf.582d6f166d2a942bb556f253394da9f5.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [50, 348, 239.258, 671.328], label: 3
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 2] File: S71_Image__2025-09-22__11-06-14_bright_6_crop_2_jpg.rf.44326343fc27a305413a4f3ce7ef73f1.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 3 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [121, 115, 254.841, 461.563], label: 2
-2025/12/09 07:59:50 - mmengine - INFO -     Box 1: [21, 459, 117.092, 675.0699999999999], label: 3
-2025/12/09 07:59:50 - mmengine - INFO -     Box 2: [119, 467, 207.434, 645.656], label: 3
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 1] File: S131_Image__2025-09-23__14-18-52_bright_2_crop_1_jpg.rf.5e83c12fd7b7da426b97baf12b369887.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 2 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [28, 60, 252.395, 181.918], label: 0
-2025/12/09 07:59:50 - mmengine - INFO -     Box 1: [33, 204, 80.774, 291.574], label: 1
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 2] File: S131_Image__2025-09-23__14-18-52_bright_2_crop_2_jpg.rf.e2eb062ad9dca5c3f3b104cf20b2fe3c.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 3 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [39, 187, 84.417, 259.837], label: 1
-2025/12/09 07:59:50 - mmengine - INFO -     Box 1: [55, 15, 255.455, 175.959], label: 0
-2025/12/09 07:59:50 - mmengine - INFO -     Box 2: [205, 94, 250.971, 172.89499999999998], label: 1
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 3] File: S71_Image__2025-09-22__11-06-14_bright_6_crop_3_jpg.rf.c9f1fd3e4181504e86a2b75dbdd0cbf0.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 2 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [89, 109, 209.494, 488.883], label: 2
-2025/12/09 07:59:50 - mmengine - INFO -     Box 1: [145, 0, 235.24, 65.349], label: 2
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 1] File: S117_Image__2025-09-22__16-28-07_bright_3_crop_1_jpg.rf.90db94cca0ae0ea208c961e4d9d2c130.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [67, 379, 138.22, 598.331], label: 2
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 3] File: S131_Image__2025-09-23__14-18-52_bright_2_crop_3_jpg.rf.87a9e5de688eaddc69c109e55784d33c.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 3 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [41, 193, 63.677, 241.602], label: 1
-2025/12/09 07:59:50 - mmengine - INFO -     Box 1: [133, 93, 188.609, 174.445], label: 1
-2025/12/09 07:59:50 - mmengine - INFO -     Box 2: [30, 40, 235.217, 171.881], label: 0
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 1] File: S56_Image__2025-09-05__14-16-25_bright_2_crop_1_jpg.rf.0c08d634147a6892148e3764fc061522.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 2 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [54, 84, 215.71, 257.97], label: 0
-2025/12/09 07:59:50 - mmengine - INFO -     Box 1: [52, 299, 144.12, 552.56], label: 3
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 2] File: S56_Image__2025-09-05__14-16-25_bright_2_crop_2_jpg.rf.74e6e619f3b947de6e1bbaa73475706a.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 2 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [68, 378, 197.6, 618.1], label: 3
-2025/12/09 07:59:50 - mmengine - INFO -     Box 1: [52, 80, 251.38, 316.7], label: 0
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 3] File: S56_Image__2025-09-05__14-16-25_bright_2_crop_3_jpg.rf.32afa02f05ce946a147d405d81370b56.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 2 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [47, 474, 154.6, 622.54], label: 3
-2025/12/09 07:59:50 - mmengine - INFO -     Box 1: [63, 50, 237.8, 274.65], label: 0
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 2] File: S117_Image__2025-09-22__16-28-07_bright_3_crop_7_jpg.rf.ece2f9b94d606f992eef6b8664fceda3.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [171, 363, 222.42000000000002, 554.938], label: 2
-2025/12/09 07:59:50 - mmengine - INFO - [BBOX DEBUG 3] File: S117_Image__2025-09-22__16-28-07_bright_3_crop_8_jpg.rf.911f240f8b10cf1a0b6ded45d448603a.jpg, Image shape: 720x256
-2025/12/09 07:59:50 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
-2025/12/09 07:59:50 - mmengine - INFO -     Box 0: [100, 381, 185.82999999999998, 580.34], label: 2
+2025/12/09 18:36:53 - mmengine - INFO - [COCO ANNO] Loaded from: /home/coder/data/trong/KLTN/Soft_Teacher/data_drill/semi_anno_multiview/_annotations.coco.labeled.grouped@40.bright.json
+2025/12/09 18:36:53 - mmengine - INFO -   → 1208 images, 1448 annotations
+2025/12/09 18:36:53 - mmengine - INFO -   → 946 files have annotations
+2025/12/09 18:36:53 - mmengine - INFO -   → 1208 files have base_img_id
+2025/12/09 18:36:53 - mmengine - INFO -   → Categories: [0, 1, 2, 3, 4, 5]
+2025/12/09 18:36:53 - mmengine - INFO -   → cat2label mapping: {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+2025/12/09 18:36:53 - mmengine - INFO -   → File 'S136_Image__2025-09-23__16-42-55_bright_4_crop_8_jpg.rf.8d03a89b2a2643c02b4733eb858e68be.jpg': 1 boxes, base_img_id=S136_bright_4, crop_num=8
+2025/12/09 18:36:53 - mmengine - INFO -   → File 'S40_Image__2025-09-04__16-02-50_bright_2_crop_6_jpg.rf.0006368956fc4380b51ac33ff3fbee7c.jpg': 1 boxes, base_img_id=S40_bright_2, crop_num=6
+2025/12/09 18:36:53 - mmengine - INFO -   → File 'S124_Image__2025-09-23__10-26-03_bright_3_crop_5_jpg.rf.eff0c11d31452dcd01ccb1959ba342f5.jpg': 2 boxes, base_img_id=S124_bright_3, crop_num=5
+2025/12/09 18:36:53 - mmengine - INFO - [COCO] Built 151 groups from base_img_id
+2025/12/09 18:36:53 - mmengine - INFO - [COCO] Total files in COCO JSON: 1208
+2025/12/09 18:36:53 - mmengine - INFO - [COCO] Unique base_img_ids: 151
+2025/12/09 18:36:53 - mmengine - INFO -   → Group 0: base_img_id=S101_bright_2, 8/8 views
+2025/12/09 18:36:53 - mmengine - INFO -   → Group 1: base_img_id=S111_bright_3, 8/8 views
+2025/12/09 18:36:53 - mmengine - INFO -   → Group 2: base_img_id=S111_bright_4, 8/8 views
+2025/12/09 18:36:53 - mmengine - INFO - [COCO ANNO] Loaded from: /home/coder/data/trong/KLTN/Soft_Teacher/data_drill/semi_anno_multiview/_annotations.coco.unlabeled.grouped@40.bright.json
+2025/12/09 18:36:53 - mmengine - INFO -   → 784 images, 956 annotations
+2025/12/09 18:36:53 - mmengine - INFO -   → 649 files have annotations
+2025/12/09 18:36:53 - mmengine - INFO -   → 784 files have base_img_id
+2025/12/09 18:36:53 - mmengine - INFO -   → Categories: [0, 1, 2, 3, 4, 5]
+2025/12/09 18:36:53 - mmengine - INFO -   → cat2label mapping: {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+2025/12/09 18:36:53 - mmengine - INFO -   → File 'S4_than_Image__2025-09-03__14-00-16_bright_2_crop_3_jpg.rf.93c6a9e3d563bf395cd5c9ef7519b742.jpg': 3 boxes, base_img_id=S4_bright_2, crop_num=3
+2025/12/09 18:36:53 - mmengine - INFO -   → File 'S225_Image__2025-07-01__14-30-51_bright_2_crop_7_jpg.rf.6b508c0dd7ed86aff7e31273da30c5e4.jpg': 2 boxes, base_img_id=S225_bright_2, crop_num=7
+2025/12/09 18:36:53 - mmengine - INFO -   → File 'S78_Image__2025-09-08__16-35-36_bright_3_crop_8_jpg.rf.84d34f89fe2af65f5adacb8437ed2ee6.jpg': 3 boxes, base_img_id=S78_bright_3, crop_num=8
+2025/12/09 18:36:53 - mmengine - INFO - [COCO] Built 98 groups from base_img_id
+2025/12/09 18:36:53 - mmengine - INFO - [COCO] Total files in COCO JSON: 784
+2025/12/09 18:36:53 - mmengine - INFO - [COCO] Unique base_img_ids: 98
+2025/12/09 18:36:53 - mmengine - INFO -   → Group 0: base_img_id=S111_bright_2, 8/8 views
+2025/12/09 18:36:53 - mmengine - INFO -   → Group 1: base_img_id=S114_bright_2, 8/8 views
+2025/12/09 18:36:53 - mmengine - INFO -   → Group 2: base_img_id=S117_bright_2, 8/8 views
+2025/12/09 18:36:53 - mmengine - INFO - [COCO ANNO] Loaded from: /home/coder/data/trong/KLTN/Soft_Teacher/data_drill/anno_valid/_annotations_filtered.bright.coco.json
+2025/12/09 18:36:53 - mmengine - INFO -   → 320 images, 442 annotations
+2025/12/09 18:36:53 - mmengine - INFO -   → 284 files have annotations
+2025/12/09 18:36:53 - mmengine - INFO -   → 320 files have base_img_id
+2025/12/09 18:36:53 - mmengine - INFO -   → Categories: [0, 1, 2, 3, 4, 5]
+2025/12/09 18:36:53 - mmengine - INFO -   → cat2label mapping: {1: 0, 2: 1, 3: 2, 4: 3, 5: 4}
+2025/12/09 18:36:53 - mmengine - INFO -   → File 'S245_Image__2025-11-11__12-09-08_bright_2_crop_5_jpg.rf.b0924b8796050c8c09b6c63180a8df2a.jpg': 1 boxes, base_img_id=S245_bright_2, crop_num=5
+2025/12/09 18:36:53 - mmengine - INFO -   → File 'S135_Image__2025-09-23__16-23-02_bright_4_crop_7_jpg.rf.1b8c818ab9826dbcd27a64c2e38414e1.jpg': 2 boxes, base_img_id=S135_bright_4, crop_num=7
+2025/12/09 18:36:53 - mmengine - INFO -   → File 'S242_Image__2025-11-11__11-56-30_bright_8_crop_1_jpg.rf.06e5607648d1e41e35c7bec4fc2eeb57.jpg': 1 boxes, base_img_id=S242_bright_8, crop_num=1
+2025/12/09 18:36:53 - mmengine - INFO - [COCO] Built 40 groups from base_img_id
+2025/12/09 18:36:53 - mmengine - INFO - [COCO] Total files in COCO JSON: 320
+2025/12/09 18:36:53 - mmengine - INFO - [COCO] Unique base_img_ids: 40
+2025/12/09 18:36:53 - mmengine - INFO -   → Group 0: base_img_id=S110_bright_2, 8/8 views
+2025/12/09 18:36:53 - mmengine - INFO -   → Group 1: base_img_id=S110_bright_3, 8/8 views
+2025/12/09 18:36:53 - mmengine - INFO -   → Group 2: base_img_id=S110_bright_4, 8/8 views
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 1] File: S69_Image__2025-09-08__11-24-36_bright_3_crop_1_jpg.rf.d38ad4d690c0dbe1d7a0a1ac76d8044d.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [179, 490, 245.52100000000002, 653.754], label: 3
+2025/12/09 18:36:53 - mmengine - INFO - MultiViewCocoMetric initialized: PER-CROP evaluation mode (no aggregation, 8 crops evaluated independently)
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 2] File: S69_Image__2025-09-08__11-24-36_bright_3_crop_2_jpg.rf.898173db23e047c0aed692b28d389f41.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 2 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [151, 131, 199.44299999999998, 301.966], label: 2
+2025/12/09 18:36:53 - mmengine - INFO -     Box 1: [107, 445, 184.832, 623.309], label: 3
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 1] File: S198_Image__2025-05-30__10-51-42_bright_2_crop_2_jpg.rf.59859817947ca368f60b43279e73d25e.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [166, 401, 228.66, 476.949], label: 1
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 2] File: S198_Image__2025-05-30__10-51-42_bright_2_crop_3_jpg.rf.b007782e88ba2f464e10e26e27522d52.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 3 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [194, 406, 244.45600000000002, 474.471], label: 1
+2025/12/09 18:36:53 - mmengine - INFO -     Box 1: [94, 411, 172.192, 465.745], label: 1
+2025/12/09 18:36:53 - mmengine - INFO -     Box 2: [154, 464, 201.8, 585.729], label: 2
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 3] File: S69_Image__2025-09-08__11-24-36_bright_3_crop_3_jpg.rf.4890334e991921ea8857d39f7cf43385.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [66, 107, 143.406, 314.3], label: 2
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 1] File: S124_Image__2025-09-23__10-18-00_bright_2_crop_1_jpg.rf.22f84fcef43a3965e66daac22143c8b6.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [30, 228, 224.023, 302.243], label: 0
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 1] File: S54_Image__2025-09-05__13-45-20_bright_2_crop_1_jpg.rf.24ae02b06c093631937c21c864ca6652.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [57, 140, 225.12, 642.47], label: 3
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 2] File: S124_Image__2025-09-23__10-18-00_bright_2_crop_2_jpg.rf.400157c0e92243e4752bb548ace149ce.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [51, 190, 218.03, 260.21], label: 0
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 3] File: S124_Image__2025-09-23__10-18-00_bright_2_crop_3_jpg.rf.791ca94de522157b8b9caaef3c58caaf.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [24, 190, 244.826, 254.49], label: 0
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 1] File: S225_Image__2025-07-01__14-30-51_bright_2_crop_1_jpg.rf.a1ababafc899c49acc50e72f46512c84.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [39, 375, 121.536, 574.107], label: 1
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 3] File: S198_Image__2025-05-30__10-51-42_bright_2_crop_4_jpg.rf.c4f188f6dbeb8faa2a2ef1c6b0d47f2a.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 3 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [155, 417, 214.36, 499.64], label: 1
+2025/12/09 18:36:53 - mmengine - INFO -     Box 1: [30, 434, 94.31, 493.65], label: 1
+2025/12/09 18:36:53 - mmengine - INFO -     Box 2: [55, 496, 122.34, 621.28], label: 2
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 2] File: S225_Image__2025-07-01__14-30-51_bright_2_crop_2_jpg.rf.dabe237fc39c89fd2f74b70107dcb052.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 3 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [137, 464, 197.15, 575.58], label: 2
+2025/12/09 18:36:53 - mmengine - INFO -     Box 1: [15, 352, 49.14, 509.25], label: 1
+2025/12/09 18:36:53 - mmengine - INFO -     Box 2: [120, 614, 162.94, 706.05], label: 2
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 3] File: S225_Image__2025-07-01__14-30-51_bright_2_crop_3_jpg.rf.94edda4a20eb8a5730d3dc7ebf24faed.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 2 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [88, 453, 123.97, 549.38], label: 2
+2025/12/09 18:36:53 - mmengine - INFO -     Box 1: [67, 610, 107.15, 680.26], label: 2
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 2] File: S54_Image__2025-09-05__13-45-20_bright_2_crop_2_jpg.rf.8a7876cbc4ff505d5f756d6a898b496a.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [49, 278, 237.06, 679.19], label: 3
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 1] File: S161_Image__2025-09-23__09-54-50_bright_2_crop_1_jpg.rf.aebdad729797e8a49336f2557b5bfac3.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [49, 274, 254.571, 449.058], label: 0
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 3] File: S54_Image__2025-09-05__13-45-20_bright_2_crop_3_jpg.rf.e6ab2df3816e5581745a3f784c5ae4b3.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [184, 69, 253.81, 320.82], label: 1
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 2] File: S161_Image__2025-09-23__09-54-50_bright_2_crop_2_jpg.rf.4ef014623afe6c6cf0f65a26023da8de.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [40, 214, 254.911, 408.576], label: 0
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 3] File: S161_Image__2025-09-23__09-54-50_bright_2_crop_3_jpg.rf.ea8e176ed5f7076dc273bd151b2a3cec.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [7, 202, 241.144, 386.103], label: 0
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 1] File: S242_Image__2025-11-11__11-52-52_bright_6_crop_1_jpg.rf.0c26109ccf0e2cc29fe2773c927e5c66.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [40, 13, 181, 353], label: 3
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 2] File: S242_Image__2025-11-11__11-52-52_bright_6_crop_2_jpg.rf.e9218a7d74d4717a4369e85ca1fe4369.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 3 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [40, 9, 108, 454], label: 3
+2025/12/09 18:36:53 - mmengine - INFO -     Box 1: [179, 526, 218, 606], label: 1
+2025/12/09 18:36:53 - mmengine - INFO -     Box 2: [89, 600, 208, 688], label: 3
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 1] File: S167_Image__2025-09-22__11-17-44_bright_3_crop_1_jpg.rf.16cf2cfbcf8a381c19acda298c10f36b.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [87, 237, 209.702, 486.473], label: 2
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 3] File: S242_Image__2025-11-11__11-52-52_bright_6_crop_3_jpg.rf.f9b208c4fe47ff924f5ef089c4ec8462.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 5 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [19, 11, 95, 311], label: 3
+2025/12/09 18:36:53 - mmengine - INFO -     Box 1: [151, 0, 244, 149], label: 3
+2025/12/09 18:36:53 - mmengine - INFO -     Box 2: [196, 234, 248, 304], label: 3
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 2] File: S167_Image__2025-09-22__11-17-44_bright_3_crop_2_jpg.rf.a62800d9167d460e4c8438ade5caa629.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [39, 186, 155.447, 438.472], label: 2
+2025/12/09 18:36:53 - mmengine - INFO - [BBOX DEBUG 3] File: S167_Image__2025-09-22__11-17-44_bright_3_crop_3_jpg.rf.357269a22e445a22752f9988c2203913.jpg, Image shape: 720x256
+2025/12/09 18:36:53 - mmengine - INFO -   → Loaded 1 boxes from COCO JSON
+2025/12/09 18:36:53 - mmengine - INFO -     Box 0: [195, 100, 236.68200000000002, 315.696], label: 2
 Name of parameter - Initialization information
 
 student.backbone.backbone.conv1.weight - torch.Size([64, 3, 7, 7]): 
@@ -3206,51 +3206,32 @@ XavierInit: gain=1, distribution=uniform, bias=0
 
 teacher.roi_head.bbox_head.shared_fcs.1.bias - torch.Size([1024]): 
 XavierInit: gain=1, distribution=uniform, bias=0 
-2025/12/09 07:59:53 - mmengine - WARNING - "FileClient" will be deprecated in future. Please use io functions in https://mmengine.readthedocs.io/en/latest/api/fileio.html#file-io
-2025/12/09 07:59:53 - mmengine - WARNING - "HardDiskBackend" is the alias of "LocalBackend" and the former will be deprecated in future.
-2025/12/09 07:59:53 - mmengine - INFO - Checkpoints will be saved to /home/coder/data/trong/KLTN/Soft_Teacher/work_dirs/soft_teacher_custom_multi_view.
-2025/12/09 07:59:53 - mmengine - INFO - [Supervised Step 0] Groups: 2 ✓, G0:7box | G1:14box
-2025/12/09 07:59:59 - mmengine - INFO - [Supervised Step 1] Groups: 2 ✓, G0:9box | G1:21box
-2025/12/09 08:00:01 - mmengine - INFO - [Supervised Step 2] Groups: 2 ✓, G0:5box | G1:3box
-2025/12/09 08:00:04 - mmengine - INFO - [Supervised Step 3] Groups: 2 ✓, G0:9box | G1:12box
-2025/12/09 08:00:08 - mmengine - INFO - [Supervised Step 4] Groups: 2 ✓, G0:13box | G1:13box
-2025/12/09 08:00:11 - mmengine - INFO - [Supervised Step 5] Groups: 2 ✓, G0:5box | G1:8box
-2025/12/09 08:00:14 - mmengine - INFO - [Supervised Step 6] Groups: 2 ✓, G0:8box | G1:3box
-2025/12/09 08:00:17 - mmengine - INFO - [Supervised Step 7] Groups: 2 ✓, G0:11box | G1:14box
-2025/12/09 08:00:20 - mmengine - INFO - [Supervised Step 8] Groups: 2 ✓, G0:3box | G1:4box
-2025/12/09 08:00:24 - mmengine - INFO - [Supervised Step 9] Groups: 2 ✓, G0:2box | G1:20box
-2025/12/09 08:00:56 - mmengine - INFO - [Teacher Predictions] Total boxes: 160, Score range: [0.946, 1.000], Mean: 0.981, Median: 0.982
-2025/12/09 08:00:56 - mmengine - INFO - [After Filtering] Threshold: 0.4, Kept: 80/160 (50.0%), Avg: 10.0 boxes/img
-2025/12/09 08:00:56 - mmengine - INFO - [Before uncertainty] Box counts per view: [10, 10, 10, 10, 10, 10, 10, 10]
-2025/12/09 08:00:56 - mmengine - INFO - [After reg_uncs] Box counts: [10, 10, 10, 10, 10, 10, 10, 10], reg_uncs sizes: [10, 10, 10, 10, 10, 10, 10, 10]
-2025/12/09 08:00:56 - mmengine - INFO - [After reg_uncs] reg_uncs shapes: ['(10,)', '(10,)', '(10,)', '(10,)', '(10,)', '(10,)', '(10,)', '(10,)']
-2025/12/09 08:00:57 - mmengine - INFO - [After cv_uncs] cv_uncs sizes: [10, 10, 10, 10, 10, 10, 10, 10]
-2025/12/09 08:00:57 - mmengine - INFO - [After cv_uncs] cv_uncs shapes: ['(10,)', '(10,)', '(10,)', '(10,)', '(10,)', '(10,)', '(10,)', '(10,)']
-2025/12/09 08:00:58 - mmengine - INFO - [Cross-View Uncertainty] Groups: 1, G0:80box(unc=0.072)
-2025/12/09 08:02:38 - mmengine - INFO - Epoch(train) [1][ 50/125]  lr: 7.4257e-06  eta: 3 days, 19:45:05  time: 3.3047  data_time: 0.0289  memory: 25318  loss: 2.2490  sup_loss_rpn_cls: 0.2113  sup_loss_rpn_bbox: 0.8510  sup_loss_cls: 0.8030  sup_acc: 84.2105  sup_num_pred_fg: 5.0000  sup_num_pred_bg: 33.0000  sup_num_gt_fg: 6.0000  sup_num_gt_bg: 32.0000  sup_acc_fg: 0.0000  sup_acc_bg: 100.0000  sup_loss_bbox: 0.2868  unsup_loss_rpn_cls: 0.1275  unsup_loss_rpn_bbox: 0.9244  unsup_loss_cls: 3.3797  unsup_acc: 66.4303  unsup_num_pred_fg: 1.0000  unsup_num_pred_bg: 422.0000  unsup_num_gt_fg: 141.0000  unsup_num_gt_bg: 282.0000  unsup_acc_fg: 0.0000  unsup_acc_bg: 99.6454  unsup_loss_bbox: 0.4156
-2025/12/09 08:02:38 - mmengine - INFO - [Supervised Step 50] Groups: 2 ✓, G0:10box | G1:10box
-2025/12/09 08:05:17 - mmengine - INFO - Epoch(train) [1][100/125]  lr: 9.9010e-06  eta: 3 days, 18:02:15  time: 3.1845  data_time: 0.0396  memory: 25318  loss: 1.8778  sup_loss_rpn_cls: 0.1720  sup_loss_rpn_bbox: 0.5446  sup_loss_cls: 0.3690  sup_acc: 61.2676  sup_num_pred_fg: 92.0000  sup_num_pred_bg: 334.0000  sup_num_gt_fg: 142.0000  sup_num_gt_bg: 284.0000  sup_acc_fg: 10.5634  sup_acc_bg: 86.6197  sup_loss_bbox: 0.7922  unsup_loss_rpn_cls: 0.1275  unsup_loss_rpn_bbox: 0.9244  unsup_loss_cls: 3.3797  unsup_acc: 66.4303  unsup_num_pred_fg: 1.0000  unsup_num_pred_bg: 422.0000  unsup_num_gt_fg: 141.0000  unsup_num_gt_bg: 282.0000  unsup_acc_fg: 0.0000  unsup_acc_bg: 99.6454  unsup_loss_bbox: 0.4156
-2025/12/09 08:05:17 - mmengine - INFO - [Supervised Step 100] Groups: 2 ✓, G0:13box | G1:7box
-2025/12/09 08:06:41 - mmengine - INFO - Exp name: soft_teacher_custom_multi_view_20251209_075939
-2025/12/09 08:08:00 - mmengine - INFO - Epoch(train) [1][150/125]  lr: 1.2376e-05  eta: 3 days, 18:11:25  time: 3.2660  data_time: 0.0431  memory: 25317  loss: 2.1656  sup_loss_rpn_cls: 0.1528  sup_loss_rpn_bbox: 0.4845  sup_loss_cls: 0.3817  sup_acc: 64.8968  sup_num_pred_fg: 40.0000  sup_num_pred_bg: 299.0000  sup_num_gt_fg: 111.0000  sup_num_gt_bg: 228.0000  sup_acc_fg: 6.3063  sup_acc_bg: 93.4211  sup_loss_bbox: 1.0725  unsup_loss_rpn_cls: 0.1074  unsup_loss_rpn_bbox: 0.8976  unsup_loss_cls: 2.8021  unsup_acc: 60.3741  unsup_num_pred_fg: 43.0000  unsup_num_pred_bg: 545.0000  unsup_num_gt_fg: 196.0000  unsup_num_gt_bg: 392.0000  unsup_acc_fg: 1.5306  unsup_acc_bg: 89.7959  unsup_loss_bbox: 0.4682
-2025/12/09 08:08:00 - mmengine - INFO - [Supervised Step 150] Groups: 2 ✓, G0:14box | G1:7box
-2025/12/09 08:10:39 - mmengine - INFO - Epoch(train) [1][200/125]  lr: 1.4851e-05  eta: 3 days, 17:40:36  time: 3.1842  data_time: 0.0419  memory: 25317  loss: 2.1936  sup_loss_rpn_cls: 0.1443  sup_loss_rpn_bbox: 0.4770  sup_loss_cls: 0.3774  sup_acc: 66.3830  sup_num_pred_fg: 16.0000  sup_num_pred_bg: 219.0000  sup_num_gt_fg: 77.0000  sup_num_gt_bg: 158.0000  sup_acc_fg: 3.8961  sup_acc_bg: 96.8354  sup_loss_bbox: 1.1531  unsup_loss_rpn_cls: 0.1096  unsup_loss_rpn_bbox: 0.8065  unsup_loss_cls: 2.1924  unsup_acc: 63.7778  unsup_num_pred_fg: 17.0000  unsup_num_pred_bg: 433.0000  unsup_num_gt_fg: 150.0000  unsup_num_gt_bg: 300.0000  unsup_acc_fg: 0.0000  unsup_acc_bg: 95.6667  unsup_loss_bbox: 0.4396
-2025/12/09 08:10:40 - mmengine - INFO - [Supervised Step 200] Groups: 2 ✓, G0:12box | G1:9box
-2025/12/09 08:13:18 - mmengine - INFO - Epoch(train) [1][250/125]  lr: 1.7327e-05  eta: 3 days, 17:14:28  time: 3.1644  data_time: 0.0407  memory: 25318  loss: 2.2115  sup_loss_rpn_cls: 0.1393  sup_loss_rpn_bbox: 0.4610  sup_loss_cls: 0.3530  sup_acc: 64.4860  sup_num_pred_fg: 64.0000  sup_num_pred_bg: 364.0000  sup_num_gt_fg: 140.0000  sup_num_gt_bg: 288.0000  sup_acc_fg: 9.2857  sup_acc_bg: 91.3194  sup_loss_bbox: 1.2178  unsup_loss_rpn_cls: 0.1124  unsup_loss_rpn_bbox: 0.7545  unsup_loss_cls: 1.8802  unsup_acc: 62.6667  unsup_num_pred_fg: 23.0000  unsup_num_pred_bg: 352.0000  unsup_num_gt_fg: 125.0000  unsup_num_gt_bg: 250.0000  unsup_acc_fg: 0.0000  unsup_acc_bg: 94.0000  unsup_loss_bbox: 0.4173
-2025/12/09 08:13:18 - mmengine - INFO - [Supervised Step 250] Groups: 2 ✓, G0:10box | G1:14box
-2025/12/09 08:15:58 - mmengine - INFO - Epoch(train) [1][300/125]  lr: 1.9802e-05  eta: 3 days, 17:07:13  time: 3.2042  data_time: 0.0419  memory: 25318  loss: 2.1954  sup_loss_rpn_cls: 0.1352  sup_loss_rpn_bbox: 0.4381  sup_loss_cls: 0.3483  sup_acc: 65.1685  sup_num_pred_fg: 20.0000  sup_num_pred_bg: 158.0000  sup_num_gt_fg: 56.0000  sup_num_gt_bg: 122.0000  sup_acc_fg: 8.9286  sup_acc_bg: 90.9836  sup_loss_bbox: 1.2289  unsup_loss_rpn_cls: 0.1147  unsup_loss_rpn_bbox: 0.7608  unsup_loss_cls: 1.6580  unsup_acc: 62.2066  unsup_num_pred_fg: 19.0000  unsup_num_pred_bg: 407.0000  unsup_num_gt_fg: 142.0000  unsup_num_gt_bg: 284.0000  unsup_acc_fg: 0.0000  unsup_acc_bg: 93.3099  unsup_loss_bbox: 0.4474
-2025/12/09 08:15:58 - mmengine - INFO - [Supervised Step 300] Groups: 2 ✓, G0:8box | G1:4box
-2025/12/09 08:18:42 - mmengine - INFO - Epoch(train) [1][350/125]  lr: 2.2277e-05  eta: 3 days, 17:19:58  time: 3.2831  data_time: 0.0474  memory: 25318  loss: 2.1789  sup_loss_rpn_cls: 0.1337  sup_loss_rpn_bbox: 0.4384  sup_loss_cls: 0.3389  sup_acc: 63.6785  sup_num_pred_fg: 75.0000  sup_num_pred_bg: 572.0000  sup_num_gt_fg: 215.0000  sup_num_gt_bg: 432.0000  sup_acc_fg: 7.9070  sup_acc_bg: 91.4352  sup_loss_bbox: 1.2408  unsup_loss_rpn_cls: 0.1154  unsup_loss_rpn_bbox: 0.7207  unsup_loss_cls: 1.4511  unsup_acc: 68.8073  unsup_num_pred_fg: 47.0000  unsup_num_pred_bg: 280.0000  unsup_num_gt_fg: 109.0000  unsup_num_gt_bg: 218.0000  unsup_acc_fg: 22.0183  unsup_acc_bg: 92.2018  unsup_loss_bbox: 0.4235
-2025/12/09 08:18:42 - mmengine - INFO - [Supervised Step 350] Groups: 2 ✓, G0:2box | G1:12box
-2025/12/09 08:21:22 - mmengine - INFO - Epoch(train) [1][400/125]  lr: 2.4752e-05  eta: 3 days, 17:10:48  time: 3.1961  data_time: 0.0475  memory: 25318  loss: 2.1552  sup_loss_rpn_cls: 0.1325  sup_loss_rpn_bbox: 0.4339  sup_loss_cls: 0.3444  sup_acc: 66.5323  sup_num_pred_fg: 14.0000  sup_num_pred_bg: 730.0000  sup_num_gt_fg: 246.0000  sup_num_gt_bg: 498.0000  sup_acc_fg: 2.0325  sup_acc_bg: 98.3936  sup_loss_bbox: 1.2444  unsup_loss_rpn_cls: 0.1154  unsup_loss_rpn_bbox: 0.7207  unsup_loss_cls: 1.4511  unsup_acc: 68.8073  unsup_num_pred_fg: 47.0000  unsup_num_pred_bg: 280.0000  unsup_num_gt_fg: 109.0000  unsup_num_gt_bg: 218.0000  unsup_acc_fg: 22.0183  unsup_acc_bg: 92.2018  unsup_loss_bbox: 0.4235
-2025/12/09 08:21:22 - mmengine - INFO - [Supervised Step 400] Groups: 2 ✓, G0:10box | G1:7box
-2025/12/09 08:24:08 - mmengine - INFO - Epoch(train) [1][450/125]  lr: 2.7228e-05  eta: 3 days, 17:25:58  time: 3.3201  data_time: 0.0432  memory: 25318  loss: 2.2080  sup_loss_rpn_cls: 0.1322  sup_loss_rpn_bbox: 0.4240  sup_loss_cls: 0.3401  sup_acc: 45.5172  sup_num_pred_fg: 257.0000  sup_num_pred_bg: 468.0000  sup_num_gt_fg: 241.0000  sup_num_gt_bg: 484.0000  sup_acc_fg: 12.0332  sup_acc_bg: 62.1901  sup_loss_bbox: 1.2196  unsup_loss_rpn_cls: 0.1200  unsup_loss_rpn_bbox: 0.6858  unsup_loss_cls: 1.2883  unsup_acc: 64.7679  unsup_num_pred_fg: 10.0000  unsup_num_pred_bg: 464.0000  unsup_num_gt_fg: 158.0000  unsup_num_gt_bg: 316.0000  unsup_acc_fg: 0.0000  unsup_acc_bg: 97.1519  unsup_loss_bbox: 0.5146
-2025/12/09 08:24:08 - mmengine - INFO - [Supervised Step 450] Groups: 2 ✓, G0:7box | G1:12box
-2025/12/09 08:26:51 - mmengine - INFO - Epoch(train) [1][500/125]  lr: 2.9703e-05  eta: 3 days, 17:27:22  time: 3.2588  data_time: 0.0419  memory: 25318  loss: 2.1567  sup_loss_rpn_cls: 0.1258  sup_loss_rpn_bbox: 0.4233  sup_loss_cls: 0.3291  sup_acc: 69.8462  sup_num_pred_fg: 22.0000  sup_num_pred_bg: 303.0000  sup_num_gt_fg: 105.0000  sup_num_gt_bg: 220.0000  sup_acc_fg: 13.3333  sup_acc_bg: 96.8182  sup_loss_bbox: 1.2451  unsup_loss_rpn_cls: 0.1202  unsup_loss_rpn_bbox: 0.6684  unsup_loss_cls: 1.1979  unsup_acc: 66.2005  unsup_num_pred_fg: 24.0000  unsup_num_pred_bg: 405.0000  unsup_num_gt_fg: 143.0000  unsup_num_gt_bg: 286.0000  unsup_acc_fg: 6.2937  unsup_acc_bg: 96.1538  unsup_loss_bbox: 0.5177
-2025/12/09 08:26:51 - mmengine - INFO - [Supervised Step 500] Groups: 2 ✓, G0:4box | G1:10box
-2025/12/09 08:29:36 - mmengine - INFO - Epoch(train) [1][550/125]  lr: 3.2178e-05  eta: 3 days, 17:33:26  time: 3.2949  data_time: 0.0403  memory: 25318  loss: 2.1794  sup_loss_rpn_cls: 0.1298  sup_loss_rpn_bbox: 0.4225  sup_loss_cls: 0.3556  sup_acc: 66.4587  sup_num_pred_fg: 12.0000  sup_num_pred_bg: 629.0000  sup_num_gt_fg: 213.0000  sup_num_gt_bg: 428.0000  sup_acc_fg: 1.4085  sup_acc_bg: 98.8318  sup_loss_bbox: 1.2248  unsup_loss_rpn_cls: 0.1218  unsup_loss_rpn_bbox: 0.6469  unsup_loss_cls: 1.2038  unsup_acc: 61.1621  unsup_num_pred_fg: 35.0000  unsup_num_pred_bg: 292.0000  unsup_num_gt_fg: 109.0000  unsup_num_gt_bg: 218.0000  unsup_acc_fg: 0.0000  unsup_acc_bg: 91.7431  unsup_loss_bbox: 0.5150
-2025/12/09 08:29:36 - mmengine - INFO - [Supervised Step 550] Groups: 2 ✓, G0:3box | G1:14box
-2025/12/09 08:32:17 - mmengine - INFO - Epoch(train) [1][600/125]  lr: 3.4653e-05  eta: 3 days, 17:28:53  time: 3.2284  data_time: 0.0359  memory: 25318  loss: 2.1116  sup_loss_rpn_cls: 0.1277  sup_loss_rpn_bbox: 0.4208  sup_loss_cls: 0.3244  sup_acc: 66.3265  sup_num_pred_fg: 5.0000  sup_num_pred_bg: 877.0000  sup_num_gt_fg: 294.0000  sup_num_gt_bg: 588.0000  sup_acc_fg: 0.3401  sup_acc_bg: 99.3197  sup_loss_bbox: 1.2386  unsup_loss_rpn_cls: 0.1218  unsup_loss_rpn_bbox: 0.6469  unsup_loss_cls: 1.2038  unsup_acc: 61.1621  unsup_num_pred_fg: 35.0000  unsup_num_pred_bg: 292.0000  unsup_num_gt_fg: 109.0000  unsup_num_gt_bg: 218.0000  unsup_acc_fg: 0.0000  unsup_acc_bg: 91.7431  unsup_loss_bbox: 0.5150
-2025/12/09 08:32:17 - mmengine - INFO - [Supervised Step 600] Groups: 2 ✓, G0:12box | G1:6box
-2025/12/09 08:35:02 - mmengine - INFO - Epoch(train) [1][650/125]  lr: 3.7129e-05  eta: 3 days, 17:34:19  time: 3.3046  data_time: 0.0412  memory: 25352  loss: 2.0855  sup_loss_rpn_cls: 0.1292  sup_loss_rpn_bbox: 0.4144  sup_loss_cls: 0.3375  sup_acc: 64.2183  sup_num_pred_fg: 47.0000  sup_num_pred_bg: 906.0000  sup_num_gt_fg: 317.0000  sup_num_gt_bg: 636.0000  sup_acc_fg: 2.8391  sup_acc_bg: 94.8113  sup_loss_bbox: 1.2169  unsup_loss_rpn_cls: 0.1228  unsup_loss_rpn_bbox: 0.6285  unsup_loss_cls: 1.1317  unsup_acc: 67.1463  unsup_num_pred_fg: 56.0000  unsup_num_pred_bg: 778.0000  unsup_num_gt_fg: 278.0000  unsup_num_gt_bg: 556.0000  unsup_acc_fg: 7.9137  unsup_acc_bg: 96.7626  unsup_loss_bbox: 0.5132
-2025/12/09 08:35:05 - mmengine - INFO - [Supervised Step 650] Groups: 2 ✓, G0:6box | G1:3box
+2025/12/09 18:36:57 - mmengine - WARNING - "FileClient" will be deprecated in future. Please use io functions in https://mmengine.readthedocs.io/en/latest/api/fileio.html#file-io
+2025/12/09 18:36:57 - mmengine - WARNING - "HardDiskBackend" is the alias of "LocalBackend" and the former will be deprecated in future.
+2025/12/09 18:36:57 - mmengine - INFO - Checkpoints will be saved to /home/coder/data/trong/KLTN/Soft_Teacher/work_dirs/soft_teacher_custom_multi_view.
+2025/12/09 18:36:57 - mmengine - INFO - [Supervised Step 0] Groups: 2 ✓, G0:8box | G1:13box
+2025/12/09 18:37:02 - mmengine - INFO - [Supervised Step 1] Groups: 2 ✓, G0:16box | G1:20box
+2025/12/09 18:37:05 - mmengine - INFO - [Supervised Step 2] Groups: 2 ✓, G0:11box | G1:7box
+2025/12/09 18:37:08 - mmengine - INFO - [Supervised Step 3] Groups: 2 ✓, G0:8box | G1:8box
+2025/12/09 18:37:11 - mmengine - INFO - [Supervised Step 4] Groups: 2 ✓, G0:7box | G1:11box
+2025/12/09 18:37:14 - mmengine - INFO - [Supervised Step 5] Groups: 2 ✓, G0:14box | G1:11box
+2025/12/09 18:37:18 - mmengine - INFO - [Supervised Step 6] Groups: 2 ✓, G0:10box | G1:7box
+2025/12/09 18:37:21 - mmengine - INFO - [Supervised Step 7] Groups: 2 ✓, G0:15box | G1:8box
+2025/12/09 18:37:24 - mmengine - INFO - [Supervised Step 8] Groups: 2 ✓, G0:7box | G1:8box
+2025/12/09 18:37:27 - mmengine - INFO - [Supervised Step 9] Groups: 2 ✓, G0:11box | G1:16box
+2025/12/09 18:39:36 - mmengine - INFO - Epoch(train) [1][ 50/125]  lr: 7.4257e-06  eta: 3 days, 16:43:41  time: 3.1958  data_time: 0.0142  memory: 25310  loss: 3.5453  sup_loss_rpn_cls: 0.2001  sup_loss_rpn_bbox: 0.8832  sup_loss_cls: 1.1736  sup_acc: 49.0826  sup_num_pred_fg: 52.0000  sup_num_pred_bg: 166.0000  sup_num_gt_fg: 89.0000  sup_num_gt_bg: 129.0000  sup_acc_fg: 8.9888  sup_acc_bg: 76.7442  sup_loss_bbox: 1.2883
+2025/12/09 18:39:36 - mmengine - INFO - [Supervised Step 50] Groups: 2 ✓, G0:3box | G1:9box
+2025/12/09 18:40:21 - mmengine - INFO - [Teacher Predictions] Total boxes: 160, Score range: [0.767, 0.977], Mean: 0.882, Median: 0.883
+2025/12/09 18:40:21 - mmengine - INFO - [After Filtering] Threshold: 0.4, Kept: 50/160 (31.2%), Avg: 6.2 boxes/img
+2025/12/09 18:40:21 - mmengine - INFO - [Class Distribution] C0:29→22 | Broken:1→1 | Chipped:127→24 | Scratched:3→3
+2025/12/09 18:40:21 - mmengine - INFO - [Before uncertainty] Box counts per view: [7, 5, 7, 7, 6, 6, 6, 6]
+2025/12/09 18:40:21 - mmengine - INFO - [After reg_uncs] Box counts: [7, 5, 7, 7, 6, 6, 6, 6], reg_uncs sizes: [7, 5, 7, 7, 6, 6, 6, 6]
+2025/12/09 18:40:21 - mmengine - INFO - [After reg_uncs] reg_uncs shapes: ['(7,)', '(5,)', '(7,)', '(7,)', '(6,)', '(6,)', '(6,)', '(6,)']
+2025/12/09 18:40:22 - mmengine - INFO - [After cv_uncs] cv_uncs sizes: [7, 5, 7, 7, 6, 6, 6, 6]
+2025/12/09 18:40:22 - mmengine - INFO - [After cv_uncs] cv_uncs shapes: ['(7,)', '(5,)', '(7,)', '(7,)', '(6,)', '(6,)', '(6,)', '(6,)']
+2025/12/09 18:40:22 - mmengine - INFO - [Cross-View Uncertainty] Groups: 1, G0:50box(unc=0.076)
+2025/12/09 18:42:22 - mmengine - INFO - Epoch(train) [1][100/125]  lr: 9.9010e-06  eta: 3 days, 18:19:56  time: 3.3146  data_time: 0.0317  memory: 25317  loss: 2.7832  sup_loss_rpn_cls: 0.1636  sup_loss_rpn_bbox: 0.6004  sup_loss_cls: 0.5198  sup_acc: 65.9722  sup_num_pred_fg: 56.0000  sup_num_pred_bg: 232.0000  sup_num_gt_fg: 117.0000  sup_num_gt_bg: 171.0000  sup_acc_fg: 29.0598  sup_acc_bg: 91.2281  sup_loss_bbox: 1.3308  unsup_loss_rpn_cls: 0.3124  unsup_loss_rpn_bbox: 0.9594  unsup_loss_cls: 1.3380  unsup_acc: 47.8328  unsup_num_pred_fg: 211.0000  unsup_num_pred_bg: 435.0000  unsup_num_gt_fg: 259.0000  unsup_num_gt_bg: 387.0000  unsup_acc_fg: 24.3243  unsup_acc_bg: 63.5659  unsup_loss_bbox: 1.6056
+2025/12/09 18:42:22 - mmengine - INFO - [Supervised Step 100] Groups: 2 ✓, G0:3box | G1:17box
+2025/12/09 18:43:41 - mmengine - INFO - Exp name: soft_teacher_custom_multi_view_20251209_183641
+2025/12/09 18:45:01 - mmengine - INFO - Epoch(train) [1][150/125]  lr: 1.2376e-05  eta: 3 days, 17:36:25  time: 3.1817  data_time: 0.0401  memory: 25317  loss: 2.5109  sup_loss_rpn_cls: 0.1495  sup_loss_rpn_bbox: 0.5542  sup_loss_cls: 0.4010  sup_acc: 57.1429  sup_num_pred_fg: 10.0000  sup_num_pred_bg: 193.0000  sup_num_gt_fg: 81.0000  sup_num_gt_bg: 122.0000  sup_acc_fg: 0.0000  sup_acc_bg: 95.0820  sup_loss_bbox: 1.4062  unsup_loss_rpn_cls: 0.3124  unsup_loss_rpn_bbox: 0.9594  unsup_loss_cls: 1.3380  unsup_acc: 47.8328  unsup_num_pred_fg: 211.0000  unsup_num_pred_bg: 435.0000  unsup_num_gt_fg: 259.0000  unsup_num_gt_bg: 387.0000  unsup_acc_fg: 24.3243  unsup_acc_bg: 63.5659  unsup_loss_bbox: 1.6056
+2025/12/09 18:45:01 - mmengine - INFO - [Supervised Step 150] Groups: 2 ✓, G0:6box | G1:13box

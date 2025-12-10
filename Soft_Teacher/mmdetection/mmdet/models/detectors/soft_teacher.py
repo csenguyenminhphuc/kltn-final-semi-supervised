@@ -347,7 +347,7 @@ class SoftTeacher(SemiBaseDetector):
                     f"roi_head.predict() size mismatch at idx {idx}: "
                     f"input {expected_size} boxes but got {actual_size} results. "
                     f"This should not happen with test_cfg=None!",
-                    logger='current', level='INFO'
+                    logger='current'
                 )
 
         reg_channel = max(
@@ -389,7 +389,7 @@ class SoftTeacher(SemiBaseDetector):
                         f"compute_uncertainty_with_aug size mismatch at idx {idx}: "
                         f"bbox.shape[0]={bbox.shape[0]} but label.shape[0]={label.shape[0]}. "
                         f"Truncated to {min_size}.",
-                        logger='current', level='INFO'
+                        logger='current'
                     )
         
         if reg_channel != 1:

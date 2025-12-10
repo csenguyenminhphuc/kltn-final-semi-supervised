@@ -215,7 +215,7 @@ Truy cập hệ thống công khai: `kltn.csenguyenminhphuc.id.vn`
 ### Web Interface
 1. **Truy cập trang chủ**: Tìm hiểu về dự án và đội ngũ
 2. **Sử dụng AI**: Upload ảnh mũi khoan để phân tích
-3. **Nhập key xác thực**: `phuc` (demo key)
+3. **Nhập key xác thực**: `kltn` (demo key)
 4. **Xem kết quả**: Hệ thống sẽ hiển thị ảnh gốc và kết quả phát hiện lỗi
 
 ### API Endpoints

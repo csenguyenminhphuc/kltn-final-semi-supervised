@@ -225,20 +225,57 @@ class MultiViewSoftTeacher(SoftTeacher):
             batch_data_samples,
             score_thr=self.semi_train_cfg.pseudo_label_initial_score_thr)
         
-        # ADDITIONAL FILTER: Limit max boxes per image to avoid class imbalance
-        # Problem: Teacher generates too many boxes → FG:BG ratio very low
-        # Solution: Keep only top-K boxes per image (sorted by score)
-        # GT statistics: mean=1.44, median=1.0, max=6 boxes/img
-        # ANALYSIS: Was 15 boxes (10x GT mean) → overprediction, high FP rate
-        # FIX: Reduce to 10 boxes (7x GT mean) → better precision/recall balance
-        max_boxes_per_image = 10
+        # ADDITIONAL FILTER: Limit max boxes per image with CLASS-BALANCED sampling
+        # Problem: Top-K by score biases toward easy classes, drops hard classes (Chipped)
+        # Solution: Keep top boxes PER CLASS to maintain class distribution
+        # GT statistics: mean=1.53, max=6 boxes/img
+        # Per-class GT avg: Severe_Rust=0.50, Scratched=0.42, Chipped=0.28, Broken=0.22, Tip_Wear=0.11
+        # Strategy: Adaptive per-class limits based on GT frequency
+        # Rationale: Severe_Rust (0.50/img) needs more quota than Tip_Wear (0.11/img)
+        #            Total max = 6+4+3+3+2 = 18 boxes (11.8× GT mean, reasonable for 8 views)
+        max_boxes_per_class_map = {
+            0: 3,  # Broken (0.22/img) → 3 boxes
+            1: 3,  # Chipped (0.28/img) → 3 boxes
+            2: 4,  # Scratched (0.42/img) → 4 boxes (medium)
+            3: 6,  # Severe_Rust (0.50/img) → 6 boxes (HIGHEST - prevent underutilization!)
+            4: 2,  # Tip_Wear (0.11/img) → 2 boxes (lowest)
+        }
+        class_dist_before = defaultdict(int)
+        class_dist_after = defaultdict(int)
+        
         for data_samples in batch_data_samples:
-            if len(data_samples.gt_instances.bboxes) > max_boxes_per_image:
-                # Sort by score descending, keep top-K
+            if len(data_samples.gt_instances.bboxes) > 0:
+                labels = data_samples.gt_instances.labels
                 scores = data_samples.gt_instances.scores
-                _, top_indices = torch.topk(scores, k=max_boxes_per_image, largest=True, sorted=False)
-                # Filter all fields
-                data_samples.gt_instances = data_samples.gt_instances[top_indices]
+                
+                # Track before filtering
+                for label in labels:
+                    class_dist_before[label.item()] += 1
+                
+                # Sample top-K boxes PER CLASS with adaptive limits
+                keep_indices = []
+                for class_id in labels.unique():
+                    class_mask = (labels == class_id)
+                    class_indices = torch.where(class_mask)[0]
+                    class_scores = scores[class_mask]
+                    
+                    # Get class-specific limit (default to 3 if class not in map)
+                    class_id_int = class_id.item()
+                    max_k = max_boxes_per_class_map.get(class_id_int, 3)
+                    
+                    # Keep top-K for this class
+                    k = min(max_k, len(class_indices))
+                    _, top_k = torch.topk(class_scores, k=k, largest=True, sorted=False)
+                    keep_indices.extend(class_indices[top_k].tolist())
+                
+                # Apply filter if we selected fewer boxes than available
+                if len(keep_indices) < len(labels):
+                    keep_indices = torch.tensor(keep_indices, device=labels.device)
+                    data_samples.gt_instances = data_samples.gt_instances[keep_indices]
+                
+                # Track after filtering
+                for label in data_samples.gt_instances.labels:
+                    class_dist_after[label.item()] += 1
         
         # LOG: After filtering
         if self._pseudo_log_count % 50 == 1:
@@ -251,6 +288,20 @@ class MultiViewSoftTeacher(SoftTeacher):
                 f"Avg: {avg_per_img:.1f} boxes/img",
                 logger='current'
             )
+            
+            # Log class distribution
+            if len(class_dist_after) > 0:
+                class_names = ['Broken', 'Chipped', 'Scratched', 'Severe_Rust', 'Tip_Wear']
+                class_strs = []
+                for cid in sorted(class_dist_after.keys()):
+                    before = class_dist_before.get(cid, 0)
+                    after = class_dist_after[cid]
+                    name = class_names[cid] if 0 <= cid < 5 else f'C{cid}'
+                    class_strs.append(f"{name}:{before}→{after}")
+                log_message(
+                    f"[Class Distribution] {' | '.join(class_strs)}",
+                    logger='current'
+                )
 
         # DEBUG: Log sizes before uncertainty computation
         if self._pseudo_log_count % 50 == 1:
@@ -308,48 +359,26 @@ class MultiViewSoftTeacher(SoftTeacher):
                 cv_shape_str = str(tuple(cv_uncs.shape))
                 num_boxes = len(data_samples.gt_instances.bboxes)
                 
-                # Log shape mismatch error
+                # Log shape mismatch error - this should NOT happen anymore
                 log_message(
                     f"CRITICAL shape mismatch at view {idx}: "
                     f"reg_uncs.shape={reg_shape_str} vs cv_uncs.shape={cv_shape_str}, "
-                    f"gt_instances={num_boxes} boxes",
-                    logger='current', level='INFO'
+                    f"gt_instances={num_boxes} boxes. "
+                    f"This indicates a bug in _compute_cross_view_uncertainty!",
+                    logger='current'
                 )
-                
-                # Emergency fix: reshape cv_uncs to match reg_uncs
-                if cv_uncs.numel() == 0:
-                    # cv_uncs is empty → create matching shape with high uncertainty
-                    cv_uncs = torch.ones_like(reg_uncs) * 0.8
-                elif reg_uncs.numel() == 0:
-                    # reg_uncs is empty → both should be empty
-                    cv_uncs = torch.zeros_like(reg_uncs)
-                elif cv_uncs.dim() != reg_uncs.dim():
-                    # Dimension mismatch → reshape
-                    if reg_uncs.dim() > cv_uncs.dim():
-                        # Expand cv_uncs dimensions
-                        for _ in range(reg_uncs.dim() - cv_uncs.dim()):
-                            cv_uncs = cv_uncs.unsqueeze(-1)
-                        cv_uncs = cv_uncs.expand_as(reg_uncs)
-                    else:
-                        # Squeeze reg_uncs (unlikely but handle it)
-                        cv_uncs = cv_uncs.reshape(reg_uncs.shape)
-                else:
-                    # Same dim but different size → pad/truncate
-                    if cv_uncs.size(0) < reg_uncs.size(0):
-                        padding = torch.ones(reg_uncs.size(0) - cv_uncs.size(0), 
-                                           *cv_uncs.shape[1:], device=cv_uncs.device) * 0.8
-                        cv_uncs = torch.cat([cv_uncs, padding], dim=0)
-                    else:
-                        cv_uncs = cv_uncs[:reg_uncs.size(0)]
-                    
-            # Combine bbox uncertainty with cross-view uncertainty
-            # Strategy: Weight cross-view heavily (0.6) to leverage multi-view information
-            # - reg_uncs: bbox localization uncertainty from jitter (range ~0.01-0.1)
-            # - cv_uncs: class-level agreement (0=all views agree, 1=only this view)
-            # - High cv_unc (e.g. 1.0) = likely false positive → should dominate
-            # - Low cv_unc (e.g. 0.0) = strong multi-view support → trust it
-            combined_uncs = reg_uncs + cv_uncs * 0.6  # INCREASED from 0.5 → multi-view dominant
-            data_samples.gt_instances['reg_uncs'] = combined_uncs
+                # Skip combining for this view to prevent crash
+                # Use only reg_uncs
+                data_samples.gt_instances['reg_uncs'] = reg_uncs
+            else:
+                # Combine bbox uncertainty with cross-view uncertainty
+                # Strategy: Weight cross-view heavily (0.6) to leverage multi-view information
+                # - reg_uncs: bbox localization uncertainty from jitter (range ~0.01-0.1)
+                # - cv_uncs: class-level agreement (0=all views agree, 1=only this view)
+                # - High cv_unc (e.g. 1.0) = likely false positive → should dominate
+                # - Low cv_unc (e.g. 0.0) = strong multi-view support → trust it
+                combined_uncs = reg_uncs + cv_uncs * 0.6  # INCREASED from 0.5 → multi-view dominant
+                data_samples.gt_instances['reg_uncs'] = combined_uncs
             data_samples.gt_instances.bboxes = bbox_project(
                 data_samples.gt_instances.bboxes,
                 torch.from_numpy(data_samples.homography_matrix).inverse().to(
@@ -537,13 +566,15 @@ class MultiViewSoftTeacher(SoftTeacher):
                     f"Size mismatch at view {idx}: "
                     f"gt_instances={num_boxes} boxes but reg_uncs={expected_size}. "
                     f"Using reg_uncs size for safety.",
-                    logger='current', level='INFO'
+                    logger='current'
                 )
                 num_boxes = expected_size
             
             if num_boxes == 0:
-                # No predictions → no uncertainty
-                cross_view_uncs.append(torch.zeros(0, device=reg_uncs_list[idx].device))
+                # No predictions → create empty tensor with SAME SHAPE as reg_uncs
+                # reg_uncs might be (0,) or (0, 4) depending on reg_channel
+                empty_unc = torch.zeros_like(reg_uncs_list[idx])
+                cross_view_uncs.append(empty_unc)
                 continue
             
             # Find which group this view belongs to
@@ -559,8 +590,11 @@ class MultiViewSoftTeacher(SoftTeacher):
                 # Single view or not grouped → max uncertainty
                 # Use expected_size from reg_uncs to ensure consistency
                 expected_size = reg_uncs_list[idx].size(0)
-                cross_view_uncs.append(
-                    torch.ones(expected_size, device=reg_uncs_list[idx].device) * 0.5)
+                unc_1d = torch.ones(expected_size, device=reg_uncs_list[idx].device) * 0.5
+                # Expand to match reg_uncs shape (N,) → (N, 4) if needed
+                if reg_uncs_list[idx].dim() > 1:
+                    unc_1d = unc_1d.unsqueeze(-1).expand_as(reg_uncs_list[idx])
+                cross_view_uncs.append(unc_1d)
                 continue
             
             # Count how many views predict each class
@@ -570,8 +604,11 @@ class MultiViewSoftTeacher(SoftTeacher):
             # CRITICAL: If num_boxes was overridden but labels is empty, return default uncertainty
             if len(labels) == 0 and num_boxes > 0:
                 # This means size mismatch happened, return high uncertainty for all boxes
-                cross_view_uncs.append(
-                    torch.ones(num_boxes, device=reg_uncs_list[idx].device) * 0.8)
+                unc_1d = torch.ones(num_boxes, device=reg_uncs_list[idx].device) * 0.8
+                # Expand to match reg_uncs shape (N,) → (N, 4) if needed
+                if reg_uncs_list[idx].dim() > 1:
+                    unc_1d = unc_1d.unsqueeze(-1).expand_as(reg_uncs_list[idx])
+                cross_view_uncs.append(unc_1d)
                 continue
             
             class_support = torch.zeros(num_boxes, device=labels.device)
@@ -627,7 +664,7 @@ class MultiViewSoftTeacher(SoftTeacher):
                 log_message(
                     f"Computed {uncertainties.size(0)} uncertainties but expected {expected_size}. "
                     f"Resizing to match reg_uncs.",
-                    logger='current', level='INFO'
+                    logger='current'
                 )
                 # Resize: pad with max uncertainty or truncate
                 if uncertainties.size(0) < expected_size:
@@ -639,6 +676,10 @@ class MultiViewSoftTeacher(SoftTeacher):
                     # Truncate
                     uncertainties = uncertainties[:expected_size]
             
+            # Expand to match reg_uncs shape (N,) → (N, 4) if needed
+            if reg_uncs_list[idx].dim() > 1:
+                uncertainties = uncertainties.unsqueeze(-1).expand_as(reg_uncs_list[idx])
+            
             cross_view_uncs.append(uncertainties)
         
         # DEBUG: Report mismatch statistics
@@ -646,7 +687,7 @@ class MultiViewSoftTeacher(SoftTeacher):
             log_message(
                 f"CRITICAL: {mismatch_count}/{total_views} views had size mismatch! "
                 f"batch_data_samples is being modified unexpectedly.",
-                logger='current', level='INFO'
+                logger='current'
             )
         
         return cross_view_uncs

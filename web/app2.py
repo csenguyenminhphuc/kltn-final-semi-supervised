@@ -197,8 +197,8 @@ def ai():
 def predict():
     # Kiểm tra key
     key = request.form.get('key', '')
-    if key != 'phuc':
-        return jsonify({'error': 'Key không đúng! Vui lòng nhập key "phuc"'}), 401
+    if key != 'kltn':
+        return jsonify({'error': 'Key không đúng! Vui lòng nhập key "kltn"'}), 401
 
     # Kiểm tra file upload
     if 'image' not in request.files:

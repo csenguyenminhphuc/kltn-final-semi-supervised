@@ -109,10 +109,10 @@ detector.rpn_head = dict(
     feat_channels=256,
     anchor_generator=dict(
         type='AnchorGenerator',
-        scales=[8, 16, 32],  # Multiple scales for objects of different sizes
+        scales=[8, 16, 32, 64],  # Multiple scales for objects of different sizes
         # TARGETED RATIOS for Severe_Rust (med=0.45, P25-P75: 0.34-0.61) and Chipped (med=0.51, P25-P75: 0.39-0.65)
         # Analysis shows 60% of Severe_Rust and 48% of Chipped have ratio < 0.5 (narrow boxes)
-        ratios=[0.3, 0.45, 0.6, 1.0, 2.0],  # Added 0.45, 0.55, 0.65 for narrow defects
+        ratios=[0.25, 0.5, 1.0, 2.0], 
         strides=[4, 8, 16, 32, 64]),
     bbox_coder=dict(
         type='DeltaXYWHBBoxCoder',
@@ -122,7 +122,7 @@ detector.rpn_head = dict(
         type='FocalLoss',  # CHANGED from CrossEntropyLoss → focus on hard examples
         use_sigmoid=True,
         gamma=2.0,         # REDUCED from 2.5 → standard ViT/Focal Loss value
-        alpha=0.5,         # REDUCED from 0.75 → more balanced FG:BG weighting
+        alpha=0.65,         # REDUCED from 0.75 → more balanced FG:BG weighting
         loss_weight=2.0),  # REDUCED from 2.5 → balance with bbox loss
     loss_bbox=dict(type='L1Loss', loss_weight=1.0))
 
@@ -135,8 +135,8 @@ detector.rpn_head = dict(
 detector.roi_head.bbox_head.loss_cls = dict(
     type='FocalLoss',     # CHANGED from CrossEntropyLoss
     use_sigmoid=True,     # MUST be True (mmdet implementation requirement)
-    gamma=2.2,            # REDUCED from 3.0 → less extreme, more stable
-    alpha=0.5,            # REDUCED from 0.75 → more balanced FG:BG weighting
+    gamma=2.0,            # REDUCED from 3.0 → less extreme, more stable
+    alpha=0.65,            # REDUCED from 0.75 → more balanced FG:BG weighting
     loss_weight=1.5)      # REDUCED from 2.5 → better balance with bbox loss
 
 # Override train_cfg to use more relaxed IoU thresholds for narrow objects
@@ -152,8 +152,8 @@ detector.train_cfg = dict(
         sampler=dict(
             type='RandomSampler',
             num=256,              # REDUCED from 512 → fewer samples for sparse data
-            pos_fraction=0.6,     # REDUCED from 0.8 → more balanced FG:BG ratio (60:40)
-            neg_pos_ub=2,         # INCREASED from 1 → allow more negatives (1:0.67 ratio)
+            pos_fraction=0.75,    # INCREASED from 0.7 → VERY strongly prefer FG (75:25)
+            neg_pos_ub=1.0,       # REDUCED from 1.5 → max 1.0 BG per FG (1:1 ratio)
             add_gt_as_proposals=False),
         allowed_border=-1,
         pos_weight=-1,
@@ -174,8 +174,8 @@ detector.train_cfg = dict(
         sampler=dict(
             type='RandomSampler',
             num=256,              # Match RPN
-            pos_fraction=0.6,     # REDUCED from 0.75 → more balanced (60:40)
-            neg_pos_ub=2,         # INCREASED from 1 → allow more negatives
+            pos_fraction=0.75,    # INCREASED from 0.7 → VERY strongly prefer FG (75:25)
+            neg_pos_ub=1.0,       # REDUCED from 1.5 → max 1.0 BG per FG (1:1 ratio)
             add_gt_as_proposals=True),
         pos_weight=-1,
         debug=False))
@@ -184,14 +184,14 @@ detector.train_cfg = dict(
 detector.test_cfg.rpn = dict(
     nms_pre=2000,           # REDUCED from 4000 → faster inference
     max_per_img=1000,       # REDUCED from 2000 → fewer low-quality proposals
-    nms=dict(type='nms', iou_threshold=0.7),
+    nms=dict(type='nms', iou_threshold=0.5),
     min_bbox_size=8)        # Keep small objects (drill bits can be narrow)
 
-# Test config for RCNN: stricter threshold to reduce false positives
+# Test config for RCNN: LOWERED threshold to detect more hard classes (Severe_Rust mAP=3.3%)
 detector.test_cfg.rcnn = dict(
-    score_thr=0.5, 
+    score_thr=0.25,  # LOWERED from 0.5 → allow lower confidence detections for hard classes
     nms=dict(type='nms', iou_threshold=0.5),
-    max_per_img=20)  # REDUCED from 100 → limit max predictions per crop
+    max_per_img=10)  # REDUCED from 20 → 1.7× GT max (sufficient buffer)
 
 
 model = dict(
@@ -204,7 +204,7 @@ model = dict(
     semi_train_cfg=dict(
         freeze_teacher=True, 
         sup_weight=1.0, 
-        unsup_weight=0.5,   # Balance supervised vs unsupervised learning
+        unsup_weight=1.0,   # Balance supervised vs unsupervised learning
         # AGGRESSIVE THRESHOLDS for hard class learning (Severe_Rust: 0.006 mAP, Chipped: 0.032 mAP)
         # Analysis: Despite having 27.6% and 19.2% of data, these classes have VERY low performance
         # → Problem is NOT data quantity but QUALITY/DIFFICULTY of examples
@@ -212,16 +212,15 @@ model = dict(
         #           even for uncertain predictions → help student learn from harder examples
         # 
         # Threshold hierarchy (progressively relaxed for better data utilization):
-        # 1. pseudo_label_initial_score_thr=0.4: Strict gate to filter low-quality teacher predictions
-        # 2. cls_pseudo_thr=0.35: Relaxed to allow more pseudo-labels (15-20% more boxes in 0.35-0.4 range)
-        # 3. rpn_pseudo_thr=0.35: Relaxed to allow more RPN proposals for learning
-        # Rationale: Hard classes (Severe_Rust: 0.006 mAP) need MORE training signal from unlabeled data
-        #            Cross-view uncertainty already provides soft weighting → can afford lower thresholds
-        #            Teacher is strong (mean score 0.985) → 0.35-0.4 predictions still reliable
-        pseudo_label_initial_score_thr=0.4,  # Strict initial gate
-        cls_pseudo_thr=0.35,                  # Relaxed to increase pseudo-label utilization
-        rpn_pseudo_thr=0.35,                  # Relaxed to allow more proposals
-        reg_pseudo_thr=0.10,                 # INCREASED from 0.02 → allow cross-view uncertainty weighted boxes
+        # 1. pseudo_label_initial_score_thr=0.3: LOWERED to allow more hard class detections (Severe_Rust)
+        # 2. cls_pseudo_thr=0.25: LOWERED aggressively for hard classes with low confidence
+        # 3. rpn_pseudo_thr=0.3: LOWERED to generate more FG proposals
+        # Rationale: Severe_Rust mAP=3.3% → need MORE training signal even from lower confidence predictions
+        #            Cross-view uncertainty provides quality control → can afford lower thresholds
+        pseudo_label_initial_score_thr=0.5,  # LOWERED from 0.4 → allow hard class detections
+        cls_pseudo_thr=0.4,                  # LOWERED from 0.35 → more pseudo-labels for Severe_Rust
+        rpn_pseudo_thr=0.4,                   # LOWERED from 0.35 → more FG proposals
+        reg_pseudo_thr=0.095,                 # Keep unchanged (jitter-based uncertainty)
         jitter_times=5,                      # Augmentation for uncertainty estimation
         jitter_scale=0.03,                   # Scale of jitter augmentation
         min_pseudo_bbox_wh=(8, 8),          # Filter small noisy boxes
@@ -444,7 +443,7 @@ val_evaluator = dict(
     # MVViT still learns cross-view relationships during training!
     aggregation='none',  # 'none' = per-crop evaluation, no aggregation
     enable_aggregation=False,  # Disable aggregation completely
-    nms_iou_thr=0.4,    # IoU threshold for clustering overlapping boxes
+    nms_iou_thr=0.5,    # IoU threshold for clustering overlapping boxes
     extract_base_name=True  # Extract base image name from crop filenames
 )
 
